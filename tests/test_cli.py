@@ -1,6 +1,6 @@
 # NOTE: This project is for Proof of Concept (POC) purposes only. It is not intended for production use.
 """
-Comprehensive CLI tests for flowbalance-core.
+Comprehensive CLI tests for flowbalance-core including transactions, AI advisor, and search.
 """
 
 from pathlib import Path
@@ -18,18 +18,7 @@ def test_cli_account_workflow(tmp_path: Path, capsys):
     data_dir = tmp_path / "data"
 
     # Add account
-    exit_code = main(
-        [
-            "--data-dir",
-            str(data_dir),
-            "account",
-            "add",
-            "--name",
-            "Main Checking",
-            "--balance",
-            "5000",
-        ]
-    )
+    exit_code = main(["--data-dir", str(data_dir), "account", "add", "--name", "Main Checking", "--balance", "5000"])
     assert exit_code == 0
     captured = capsys.readouterr()
     assert "Added Account" in captured.out
@@ -52,26 +41,32 @@ def test_cli_account_workflow(tmp_path: Path, capsys):
     assert exit_code == 1
 
 
+def test_cli_transaction_workflow(tmp_path: Path, capsys):
+    data_dir = tmp_path / "data"
+
+    # Add transaction
+    exit_code = main(["--data-dir", str(data_dir), "tx", "add", "--desc", "Grocery Store", "--amount", "-150.0", "--category", "needs", "--tags", "food"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "Recorded Transaction" in captured.out
+    tx_id = captured.out.split("[ID: ")[1].split("]")[0]
+
+    # List transactions
+    exit_code = main(["--data-dir", str(data_dir), "tx", "list"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "Grocery Store" in captured.out
+
+    # Remove transaction
+    assert main(["--data-dir", str(data_dir), "tx", "rm", tx_id]) == 0
+    assert main(["--data-dir", str(data_dir), "tx", "rm", "missing_id"]) == 1
+
+
 def test_cli_income_and_expense_workflow(tmp_path: Path, capsys):
     data_dir = tmp_path / "data"
 
     # Add Income
-    exit_code = main(
-        [
-            "--data-dir",
-            str(data_dir),
-            "income",
-            "add",
-            "--name",
-            "Salary",
-            "--amount",
-            "6000",
-            "--frequency",
-            "monthly",
-            "--tax-pct",
-            "15",
-        ]
-    )
+    exit_code = main(["--data-dir", str(data_dir), "income", "add", "--name", "Salary", "--amount", "6000", "--frequency", "monthly", "--tax-pct", "15"])
     assert exit_code == 0
     captured = capsys.readouterr()
     inc_id = captured.out.split("[ID: ")[1].split("]")[0]
@@ -83,22 +78,7 @@ def test_cli_income_and_expense_workflow(tmp_path: Path, capsys):
     assert "Salary" in captured.out
 
     # Add Expense
-    exit_code = main(
-        [
-            "--data-dir",
-            str(data_dir),
-            "expense",
-            "add",
-            "--name",
-            "Rent",
-            "--amount",
-            "2000",
-            "--frequency",
-            "monthly",
-            "--category",
-            "needs",
-        ]
-    )
+    exit_code = main(["--data-dir", str(data_dir), "expense", "add", "--name", "Rent", "--amount", "2000", "--frequency", "monthly", "--category", "needs"])
     assert exit_code == 0
     captured = capsys.readouterr()
     exp_id = captured.out.split("[ID: ")[1].split("]")[0]
@@ -120,34 +100,8 @@ def test_cli_income_and_expense_workflow(tmp_path: Path, capsys):
 def test_cli_forecast_and_stress_test(tmp_path: Path, capsys):
     data_dir = tmp_path / "data"
     main(["--data-dir", str(data_dir), "account", "add", "--name", "Savings", "--balance", "20000"])
-    main(
-        [
-            "--data-dir",
-            str(data_dir),
-            "income",
-            "add",
-            "--name",
-            "Base Pay",
-            "--amount",
-            "5000",
-            "--frequency",
-            "monthly",
-        ]
-    )
-    main(
-        [
-            "--data-dir",
-            str(data_dir),
-            "expense",
-            "add",
-            "--name",
-            "Living Cost",
-            "--amount",
-            "2500",
-            "--frequency",
-            "monthly",
-        ]
-    )
+    main(["--data-dir", str(data_dir), "income", "add", "--name", "Base Pay", "--amount", "5000", "--frequency", "monthly"])
+    main(["--data-dir", str(data_dir), "expense", "add", "--name", "Living Cost", "--amount", "2500", "--frequency", "monthly"])
     capsys.readouterr()
 
     # Forecast terminal
@@ -164,9 +118,7 @@ def test_cli_forecast_and_stress_test(tmp_path: Path, capsys):
 
     # Forecast Markdown output file
     out_md = tmp_path / "forecast.md"
-    exit_code = main(
-        ["--data-dir", str(data_dir), "forecast", "--days", "30", "--out", str(out_md)]
-    )
+    exit_code = main(["--data-dir", str(data_dir), "forecast", "--days", "30", "--out", str(out_md)])
     assert exit_code == 0
     assert out_md.exists()
 
@@ -175,3 +127,28 @@ def test_cli_forecast_and_stress_test(tmp_path: Path, capsys):
     assert exit_code == 0
     captured = capsys.readouterr()
     assert "SOLVENCY STRESS TEST" in captured.out
+
+
+def test_cli_ask_and_search(tmp_path: Path, capsys):
+    data_dir = tmp_path / "data"
+    main(["--data-dir", str(data_dir), "account", "add", "--name", "Reserve Checking", "--balance", "15000"])
+    main(["--data-dir", str(data_dir), "expense", "add", "--name", "Cloud Hosting", "--amount", "100", "--frequency", "monthly", "--category", "needs"])
+    capsys.readouterr()
+
+    # Ask
+    exit_code = main(["--data-dir", str(data_dir), "ask", "How long is my emergency runway?"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "AI WEALTH ADVISORY" in captured.out
+
+    # Ask JSON
+    exit_code = main(["--data-dir", str(data_dir), "ask", "Where is my money going?", "--json"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert '"executive_summary"' in captured.out
+
+    # Search
+    exit_code = main(["--data-dir", str(data_dir), "search", "Hosting"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "Cloud Hosting" in captured.out

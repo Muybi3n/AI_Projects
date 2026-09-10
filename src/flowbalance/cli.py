@@ -11,8 +11,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import __version__
+from .advisor import FinancialAdvisor
 from .engine import CashFlowForecaster, SolvencyTester
-from .models import Account, Expense, IncomeStream
+from .models import Account, Expense, IncomeStream, Transaction
 from .reporting import format_forecast_markdown, render_ascii_sparkline
 from .storage import FinanceStore
 
@@ -21,7 +22,7 @@ def print_banner():
     banner = f"""
 ┌─────────────────────────────────────────────────────────────┐
 │  flowbalance v{__version__:<10}                                    │
-│  Deterministic Cash Flow & Wealth Velocity Engine           │
+│  Deterministic Cash Flow & AI Wealth Advisory Engine        │
 └─────────────────────────────────────────────────────────────┘
 """
     print(banner)
@@ -33,11 +34,9 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="flowbalance",
-        description="Deterministic Local-First Cash Flow Forecasting & Solvency Runway Engine.",
+        description="Deterministic Local-First Cash Flow Forecasting, AI Contextualization & Search Engine.",
     )
-    parser.add_argument(
-        "--data-dir", type=Path, default=None, help="Custom data storage directory."
-    )
+    parser.add_argument("--data-dir", type=Path, default=None, help="Custom data storage directory.")
     parser.add_argument("--version", "-v", action="version", version=f"flowbalance {__version__}")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -54,6 +53,21 @@ def main(argv: list[str] | None = None) -> int:
     acc_sub.add_parser("list", help="List accounts.")
     acc_rm = acc_sub.add_parser("rm", help="Remove account.")
     acc_rm.add_argument("id", help="Account ID.")
+
+    # --- Transaction Ledger commands ---
+    tx_p = subparsers.add_parser("tx", help="Manage historical transaction ledger.")
+    tx_sub = tx_p.add_subparsers(dest="subcommand", required=True)
+
+    tx_add = tx_sub.add_parser("add", help="Record a transaction.")
+    tx_add.add_argument("--desc", required=True, help="Transaction description.")
+    tx_add.add_argument("--amount", type=float, required=True, help="Amount (+ for inflow, - for outflow).")
+    tx_add.add_argument("--category", default="needs", help="Category (needs, wants, investments, etc.).")
+    tx_add.add_argument("--date", default=None, help="Date (YYYY-MM-DD). Defaults to today.")
+    tx_add.add_argument("--tags", nargs="*", default=[], help="Optional tags.")
+
+    tx_sub.add_parser("list", help="List recent transactions.")
+    tx_rm = tx_sub.add_parser("rm", help="Remove transaction.")
+    tx_rm.add_argument("id", help="Transaction ID.")
 
     # --- Income commands ---
     inc_p = subparsers.add_parser("income", help="Manage income streams.")
@@ -91,9 +105,7 @@ def main(argv: list[str] | None = None) -> int:
         choices=["needs", "wants", "investments", "taxes", "debt", "emergency"],
         default="needs",
     )
-    exp_add.add_argument(
-        "--non-essential", action="store_true", help="Mark as discretionary/non-essential."
-    )
+    exp_add.add_argument("--non-essential", action="store_true", help="Mark as discretionary/non-essential.")
     exp_add.add_argument("--start", default=None, help="Start date (YYYY-MM-DD).")
 
     exp_sub.add_parser("list", help="List expenses.")
@@ -108,9 +120,17 @@ def main(argv: list[str] | None = None) -> int:
 
     # --- Stress-test command ---
     stress_p = subparsers.add_parser("stress-test", help="Evaluate runway under income shock.")
-    stress_p.add_argument(
-        "--haircut", type=float, default=100.0, help="Income reduction percentage (0-100%)."
-    )
+    stress_p.add_argument("--haircut", type=float, default=100.0, help="Income reduction percentage (0-100%).")
+
+    # --- Ask / AI Advisor command ---
+    ask_p = subparsers.add_parser("ask", help="Ask the AI Financial Advisor a natural-language question.")
+    ask_p.add_argument("query", help="Your financial question or scenario.")
+    ask_p.add_argument("--json", action="store_true", help="Output raw JSON analysis.")
+
+    # --- Search command ---
+    search_p = subparsers.add_parser("search", help="Full-text FTS5 search across all financial ledgers.")
+    search_p.add_argument("query", help="Search terms.")
+    search_p.add_argument("--limit", type=int, default=10, help="Max results.")
 
     args = parser.parse_args(argv)
     store = FinanceStore(args.data_dir)
@@ -119,9 +139,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "account":
         if args.subcommand == "add":
             acc_id = str(uuid.uuid4())[:8]
-            acc = Account(
-                id=acc_id, name=args.name, balance=args.balance, is_liquid=not args.illiquid
-            )
+            acc = Account(id=acc_id, name=args.name, balance=args.balance, is_liquid=not args.illiquid)
             store.add_account(acc)
             print(f"[✓] Added Account: '{acc.name}' (${acc.balance:,.2f}) [ID: {acc.id}]")
         elif args.subcommand == "list":
@@ -138,6 +156,35 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Error: Account {args.id} not found.", file=sys.stderr)
                 return 1
 
+    # --- Handle Transaction ---
+    elif args.command == "tx":
+        if args.subcommand == "add":
+            tx_id = str(uuid.uuid4())[:8]
+            d_str = args.date or datetime.now(timezone.utc).date().isoformat()
+            tx = Transaction(
+                id=tx_id,
+                date_str=d_str,
+                amount=args.amount,
+                description=args.desc,
+                category=args.category,
+                tags=args.tags,
+            )
+            store.add_transaction(tx)
+            print(f"[✓] Recorded Transaction: '{tx.description}' (${tx.amount:,.2f}) [ID: {tx.id}]")
+        elif args.subcommand == "list":
+            txs = store.list_transactions()
+            print(f"\nRecent Transactions ({len(txs)} total):")
+            print("─" * 65)
+            for t in txs:
+                sign = "+" if t.amount >= 0 else "-"
+                print(f"[{t.id}] {t.date_str}  {t.description:<25} {sign}${abs(t.amount):>9,.2f}  [{t.category}]")
+        elif args.subcommand == "rm":
+            if store.remove_transaction(args.id):
+                print(f"[✓] Removed transaction {args.id}")
+            else:
+                print(f"Error: Transaction {args.id} not found.", file=sys.stderr)
+                return 1
+
     # --- Handle Income ---
     elif args.command == "income":
         if args.subcommand == "add":
@@ -152,17 +199,13 @@ def main(argv: list[str] | None = None) -> int:
                 tax_withholding_pct=args.tax_pct,
             )
             store.add_income(inc)
-            print(
-                f"[✓] Added Income: '{inc.name}' (${inc.amount:,.2f} {inc.frequency}) [ID: {inc.id}]"
-            )
+            print(f"[✓] Added Income: '{inc.name}' (${inc.amount:,.2f} {inc.frequency}) [ID: {inc.id}]")
         elif args.subcommand == "list":
             incomes = store.list_incomes()
             print(f"\nIncome Streams ({len(incomes)} total):")
             print("─" * 60)
             for i in incomes:
-                print(
-                    f"[{i.id}] {i.name:<20} ${i.amount:>10,.2f}  ({i.frequency}) Net: ${i.net_amount:,.2f}"
-                )
+                print(f"[{i.id}] {i.name:<20} ${i.amount:>10,.2f}  ({i.frequency}) Net: ${i.net_amount:,.2f}")
         elif args.subcommand == "rm":
             if store.remove_income(args.id):
                 print(f"[✓] Removed income {args.id}")
@@ -185,18 +228,14 @@ def main(argv: list[str] | None = None) -> int:
                 is_essential=not args.non_essential,
             )
             store.add_expense(exp)
-            print(
-                f"[✓] Added Expense: '{exp.name}' (${exp.amount:,.2f} {exp.frequency}) [ID: {exp.id}]"
-            )
+            print(f"[✓] Added Expense: '{exp.name}' (${exp.amount:,.2f} {exp.frequency}) [ID: {exp.id}]")
         elif args.subcommand == "list":
             expenses = store.list_expenses()
             print(f"\nRecurring Expenses ({len(expenses)} total):")
             print("─" * 65)
             for e in expenses:
                 ess = "Essential" if e.is_essential else "Discretionary"
-                print(
-                    f"[{e.id}] {e.name:<20} ${e.amount:>10,.2f}  ({e.frequency:<10}) [{e.category}] ({ess})"
-                )
+                print(f"[{e.id}] {e.name:<20} ${e.amount:>10,.2f}  ({e.frequency:<10}) [{e.category}] ({ess})")
         elif args.subcommand == "rm":
             if store.remove_expense(args.id):
                 print(f"[✓] Removed expense {args.id}")
@@ -251,9 +290,7 @@ def main(argv: list[str] | None = None) -> int:
         incomes = store.list_incomes()
         expenses = store.list_expenses()
 
-        solvency = SolvencyTester.evaluate(
-            accounts, incomes, expenses, income_haircut_pct=args.haircut
-        )
+        solvency = SolvencyTester.evaluate(accounts, incomes, expenses, income_haircut_pct=args.haircut)
         print("\n" + "=" * 60)
         print(f"       SOLVENCY STRESS TEST ({args.haircut:.0f}% Income Loss)       ")
         print("=" * 60)
@@ -264,6 +301,58 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  Essential Runway         : {solvency.essential_runway_months} Months")
         print(f"  Solvency Rating          : {solvency.solvency_rating}")
         print("=" * 60)
+
+    # --- Handle Ask (AI Advisor) ---
+    elif args.command == "ask":
+        accounts = store.list_accounts()
+        incomes = store.list_incomes()
+        expenses = store.list_expenses()
+        transactions = store.list_transactions()
+        solvency = SolvencyTester.evaluate(accounts, incomes, expenses)
+
+        advisor = FinancialAdvisor()
+        response = advisor.consult(args.query, accounts, incomes, expenses, transactions, solvency)
+
+        if args.json:
+            print(json.dumps(response.to_dict(), indent=2))
+            return 0
+
+        print("\n" + "━" * 60)
+        print(f"🤖 AI WEALTH ADVISORY: '{args.query}'")
+        print("━" * 60)
+        print(f"\n🎯 EXECUTIVE SUMMARY:\n{response.executive_summary}\n")
+        if response.observations:
+            print("🔍 OBSERVATIONS:")
+            for obs in response.observations:
+                print(f"  • {obs}")
+            print()
+        if response.recommendations:
+            print("⚡ RECOMMENDATIONS:")
+            for rec in response.recommendations:
+                print(f"  • {rec}")
+            print()
+        if response.risk_flags:
+            print("⚠️ RISK FLAGS:")
+            for risk in response.risk_flags:
+                print(f"  • {risk}")
+            print()
+        if response.simulated_impact:
+            print(f"📈 IMPACT: {response.simulated_impact}")
+        print("━" * 60)
+
+    # --- Handle Search ---
+    elif args.command == "search":
+        hits = store.search_engine.search(args.query, limit=args.limit)
+        print(f"\nSearch results for '{args.query}' ({len(hits)} hit(s)):")
+        print("─" * 60)
+        if not hits:
+            print("No matching financial records found.")
+            return 0
+        for h in hits:
+            print(f"• [{h.item_type.upper()}] {h.title} (ID: {h.item_id})")
+            if h.snippet:
+                print(f"  Match: {h.snippet}")
+        print()
 
     return 0
 

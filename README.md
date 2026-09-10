@@ -1,7 +1,7 @@
 <div align="center">
   <div>&nbsp;</div>
   <h1>💰 flowbalance-core</h1>
-  <p><strong>Deterministic Local-First Cash Flow Forecasting, Multi-Bucket Allocation & Solvency Runway Engine</strong></p>
+  <p><strong>Deterministic Local-First Cash Flow Forecasting, AI Wealth Advisory & SQLite FTS5 Search Engine</strong></p>
 
   [![CI Pipeline](https://img.shields.io/badge/CI-Passing-success?style=flat-square&logo=github-actions)](https://github.com/Muybi3n/AI_Projects/actions)
   [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?style=flat-square&logo=python)](#)
@@ -12,52 +12,67 @@
 
 ---
 
-> **⚠️ NOTE:** This project is for **Proof of Concept (POC)** and personal financial modeling purposes only. It is not licensed financial or tax advice. Always verify calculations before making capital allocation decisions.
+> **⚠️ NOTE:** This project is for **Proof of Concept (POC)** and personal financial modeling purposes only. It is not licensed financial, tax, or legal advice. Always verify calculations before making capital allocation decisions.
 
 ---
 
 ## 📌 Overview
 
-Most personal finance apps suffer from one of three flaws: they sell user transaction data to advertisers, require expensive cloud subscriptions, or only look backward at historical spending without forecasting future liquidity.
+Most personal finance apps suffer from significant flaws: they monetize private user transactions, require subscription lock-in, or only display backwards-looking historical charts without predictive forecasting.
 
-**`flowbalance-core`** is a deterministic, 100% offline personal finance engine that simulates your forward daily cash flow over 30 to 365 days. It models recurring income streams, tax withholdings, essential vs. discretionary burn rates, and evaluates your emergency solvency runway under sudden income shock scenarios.
+**`flowbalance-core`** is a 100% offline personal finance engine that combines **deterministic forward cash flow simulation**, an **AI-powered Natural Language Financial Advisor**, and a sub-millisecond **SQLite FTS5 Full-Text Ledger Search**.
+
+### Core Pillars:
+1. 📈 **Deterministic Daily Trajectory:** Simulates forward cash balances over 30–365 days across irregular schedules (daily, weekly, biweekly, monthly, quarterly).
+2. 🤖 **AI Contextualization & Wealth Advisory:** PII-sanitized contextualization engine that answers natural language inquiries (*"How long is my runway if I lose client X?"*, *"Where is my discretionary capital going?"*).
+3. 🔎 **SQLite FTS5 Full-Text Search:** Sub-millisecond BM25 search across transaction descriptions, recurring expense notes, and account ledgers.
+4. 🛡️ **Solvency & Shock Stress-Testing:** Computes essential emergency runway duration (AAA to C solvency rating) under 0% to 100% income loss scenarios.
 
 ---
 
-## 🏗️ Architecture & Simulation Flow
+## 🏗️ Architecture & Pipeline Flow
 
 ```mermaid
 graph TD
-    A[Local Profile: Accounts, Incomes, Expenses] --> B[Phase 1: Cash Flow Ingestion]
-    B --> C[Annualized Frequency Normalizer]
+    A[Local Finance Store ~/.flowbalance/] --> B[Account & Ledger State]
+    B --> C[Phase 1: Deterministic Forecaster]
+    B --> D[Phase 2: SQLite FTS5 Search Engine]
+    B --> E[Phase 3: AI Contextualization Engine]
     
-    subgraph "Simulation Engine"
-        C --> D[Day-by-Day Balance Trajectory 30-365 Days]
-        D --> E[Multi-Frequency Event Resolver: Daily, Biweekly, Monthly, Quarterly]
-        D --> F[Tax Reserve & Withholding Deductions]
+    subgraph "Deterministic Simulation Engine"
+        C --> C1[Multi-Frequency Schedule Resolver]
+        C --> C2[Tax Reserve Withholdings]
+        C --> C3[30-365 Day Daily Balance Curve]
+        C --> C4[Solvency Runway Calculator]
     end
     
-    subgraph "Solvency & Stress Testing"
-        E --> G[Essential vs Discretionary Burn Analysis]
-        G --> H[Emergency Runway Calculator: Months of Survival]
-        G --> I[Income Shock Stress Test 0-100% Haircut]
+    subgraph "AI Contextualization & Advisory"
+        E --> E1[PII Sanitization & Structured State Compilation]
+        E --> E2[Deterministic Heuristic Reasoner / Pluggable LLM]
+        E --> E3[Structured Advice, Risk Flags & Impact Simulation]
     end
     
-    F & H & I --> J[Phase 3: Reporting Sinks]
-    J --> K[Terminal Sparkline Dashboards]
-    J --> L[Monthly Markdown Audit Reports]
-    J --> M[JSON Pipeline Manifests]
+    subgraph "SQLite FTS5 Search Index"
+        D --> D1[Transactions & Receipts]
+        D --> D2[Recurring Expense Notes]
+        D --> D3[BM25 Ranked Lexical Query]
+    end
+    
+    C3 & E3 & D3 --> F[Phase 4: CLI & Reporting Sinks]
+    F --> G[Terminal Sparkline Dashboards]
+    F --> H[Natural Language 'ask' Interface]
+    F --> I[Monthly Markdown Audit Reports]
 ```
 
 ---
 
 ## 🚀 Key Features
 
-* **🔒 100% Local-First & Zero Cloud Retention:** All account balances and financial records stay on your local machine (`~/.flowbalance/`). Zero bank credentials, zero cloud tracking.
-* **📈 Forward-Looking Deterministic Trajectory:** Simulates daily cash balances up to 365 days into the future, accurately scheduling irregular inflows (biweekly paychecks, quarterly tax payments).
-* **🛡️ Solvency & Runway Stress-Testing:** Calculates emergency buffer survival months (AAA to C ratings) under 0% to 100% income loss scenarios.
-* **📊 Terminal Sparklines & Markdown Audits:** Renders ASCII trajectory sparklines directly in your terminal and generates detailed monthly Markdown reports.
-* **📦 Zero Dependencies:** Core simulation and storage engine built on pure Python 3.10+ standard library.
+* **🔒 100% Local-First & Zero Cloud Retention:** All account balances, transactions, and simulation models stay on your local machine (`~/.flowbalance/`).
+* **🤖 Natural Language Inquiries:** Ask complex financial questions directly in plain English via `flowbalance ask`.
+* **🔎 Instant FTS5 Full-Text Search:** Search all transaction descriptions, notes, and tags instantly via `flowbalance search`.
+* **📈 Forward-Looking Cash Simulation:** Models real-world cash flow events and prevents negative liquidity surprises months in advance.
+* **🛡️ Solvency Shock Testing:** Evaluates survival runway under sudden career disruptions or variable income dry spells.
 
 ---
 
@@ -66,95 +81,106 @@ graph TD
 ### Phase 1: Installation & Setup
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/Muybi3n/AI_Projects.git
 cd AI_Projects
 
-# Install in editable mode
+# Install editable package
 pip install -e .
 ```
 
-### Phase 2: Configuring Accounts & Inflows
+### Phase 2: Ingesting Accounts, Incomes & Expenses
 
 ```bash
-# Add checking and emergency savings accounts
-flowbalance account add --name "Primary Checking" --balance 7500
+# Configure accounts
+flowbalance account add --name "Primary Checking" --balance 8000
 flowbalance account add --name "Emergency Vault" --balance 25000
 
-# Add recurring biweekly salary with 22% tax withholding
-flowbalance income add --name "Software Consulting" --amount 4500 --frequency biweekly --tax-pct 22
+# Configure recurring income (biweekly with 22% tax reserve)
+flowbalance income add --name "Engineering Consulting" --amount 4500 --frequency biweekly --tax-pct 22
 
-# Add recurring monthly expenses
-flowbalance expense add --name "Mortgage / Rent" --amount 2400 --frequency monthly --category needs
-flowbalance expense add --name "Groceries & Utilities" --amount 800 --frequency monthly --category needs
-flowbalance expense add --name "Dining & Entertainment" --amount 500 --frequency monthly --category wants --non-essential
+# Configure recurring expenses
+flowbalance expense add --name "Rent / Housing" --amount 2200 --frequency monthly --category needs
+flowbalance expense add --name "Groceries & Utilities" --amount 750 --frequency monthly --category needs
+flowbalance expense add --name "Cloud Servers" --amount 150 --frequency monthly --category needs
 ```
 
-### Phase 3: Running Cash Flow Projections
+### Phase 3: Recording Transaction Ledger Entries
 
 ```bash
-# Run 180-day forward cash trajectory
+# Record historical transactions
+flowbalance tx add --desc "AWS Cloud Infrastructure" --amount -150.0 --category needs --tags hosting dev
+flowbalance tx add --desc "Consulting Retainer Milestone" --amount 4500.0 --category income --tags consulting
+```
+
+### Phase 4: Querying with Natural Language AI Advisor
+
+```bash
+flowbalance ask "How long is my emergency runway if I lose my consulting income?"
+```
+
+**Example Output:**
+```text
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 AI WEALTH ADVISORY: 'How long is my emergency runway if I lose my consulting income?'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 EXECUTIVE SUMMARY:
+With $33,000.00 in liquid capital, your emergency runway stands at 10.6 months 
+of essential expenses ($3,100.00/mo).
+
+🔍 OBSERVATIONS:
+  • Solvency rating is currently evaluated as AAA (Fortress Runway >= 12 mos).
+  • Emergency capital buffer exceeds standard 6-month safety threshold.
+
+⚡ RECOMMENDATIONS:
+  • Ensure tax reserve allocations are isolated before calculating deployable surplus.
+  • Run forward 180-day forecast to monitor upcoming quarterly cash obligations.
+
+📈 IMPACT: In the event of a total income shock, core obligations are protected through 10.6 months.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Phase 5: Searching Financial Records with FTS5
+
+```bash
+flowbalance search "Infrastructure"
+```
+
+**Example Search Output:**
+```text
+Search results for 'Infrastructure' (1 hit(s)):
+────────────────────────────────────────────────────────────
+• [TRANSACTION] AWS Cloud Infrastructure (ID: e4a19b22)
+  Match: ...[MATCH]Infrastructure[/MATCH]...
+```
+
+### Phase 6: Forecasting Forward Cash Trajectory
+
+```bash
 flowbalance forecast --days 180
 ```
 
-**Example Terminal Output:**
+**Example Forecast Output:**
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  flowbalance v0.1.0                                         │
-│  Deterministic Cash Flow & Wealth Velocity Engine           │
-└─────────────────────────────────────────────────────────────┘
-
 ============================================================
                   CASH FLOW FORECAST                    
 ============================================================
-  Starting Balance     : $32,500.00
-  Projected Balance    : $55,840.00  (+$23,340.00)
-  Monthly Burn Rate    : $3,700.00/mo
+  Starting Balance     : $33,000.00
+  Projected Balance    : $54,120.00  (+$21,120.00)
+  Monthly Burn Rate    : $3,100.00/mo
   Solvency Rating      : AAA (Fortress Runway >= 12 mos)
-  Emergency Runway     : 10.2 Months
+  Emergency Runway     : 10.6 Months
   Projection Sparkline : [ ▂▃▄▅▅▆▆▇████]
 ============================================================
 ```
 
-### Phase 4: Stress-Testing Financial Resilience
-
-Simulate what happens if income drops by 50% or 100%:
-
-```bash
-# Simulate 100% immediate income loss
-flowbalance stress-test --haircut 100
-```
-
-**Example Stress-Test Output:**
-```text
-============================================================
-       SOLVENCY STRESS TEST (100% Income Loss)       
-============================================================
-  Available Liquid Capital : $32,500.00
-  Baseline Monthly Burn    : $3,700.00
-  Essential Monthly Burn   : $3,200.00
-  Full Runway Duration     : 8.8 Months
-  Essential Runway         : 10.2 Months
-  Solvency Rating          : AA (Solid Emergency Buffer 6-12 mos)
-============================================================
-```
-
-### Phase 5: Exporting Reports for Audits
-
-```bash
-# Export monthly Markdown health audit
-flowbalance forecast --days 90 --out ~/documents/financial_audit.md
-
-# Export raw JSON timeline for scripts
-flowbalance forecast --days 30 --json
-```
-
 ---
 
-## 🔒 Security & Privacy
+## 🔒 Security & Safe Computing
 
-* **Zero Cloud Connection:** No third-party APIs, bank scraping tokens, or credentials stored.
-* **No Telemetry:** Works completely offline in air-gapped environments.
+* **Zero Hardcoded Secrets:** This project contains zero hardcoded API keys, tokens, or banking credentials.
+* **Privacy-Preserving AI:** Sanitizes all PII before formatting context for LLM queries.
 
 ---
 
