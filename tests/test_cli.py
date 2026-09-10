@@ -86,6 +86,42 @@ def test_cli_full_workflow(tmp_path: Path, capsys):
     captured = capsys.readouterr()
     assert "PTO Accrual & Rollover Audit" in captured.out
 
+    # School Import
+    code = main(
+        [
+            "--data-dir",
+            str(data_dir),
+            "school",
+            "import",
+            "--text",
+            "2026-10-09: Student Holiday / Planning Day\n2026-11-23 to 2026-11-27: Thanksgiving Break",
+            "--source",
+            "Fairfax County PS",
+            "--students",
+            "Emma, Liam",
+        ]
+    )
+    assert code == 0
+
+    # School List
+    code = main(["--data-dir", str(data_dir), "school", "list"])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "Academic Events" in captured.out
+    assert "Fairfax County" in captured.out
+
+    # School Conflicts
+    code = main(["--data-dir", str(data_dir), "school", "conflicts"])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "Childcare Conflict Radar" in captured.out
+
+    # School Family Breaks
+    code = main(["--data-dir", str(data_dir), "school", "family-breaks"])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "Family Vacation Windows" in captured.out
+
     # Ask
     code = main(["--data-dir", str(data_dir), "ask", "How can I stack holidays in 2026?"])
     assert code == 0

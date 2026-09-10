@@ -1,7 +1,7 @@
 <div align="center">
   <div>&nbsp;</div>
   <h1>🌴 ptomax-core</h1>
-  <p><strong>PTO Holiday Stacking Optimizer, Work Handover Coverage Matrix, OOO Email Synthesizer & Leave Accrual Engine</strong></p>
+  <p><strong>PTO Holiday Stacking Optimizer, Multi-School Syllabus & Calendar Ingestion, Work Handover Matrix & OOO Email Synthesizer</strong></p>
 
   [![CI Pipeline](https://img.shields.io/badge/CI-Passing-success?style=flat-square&logo=github-actions)](https://github.com/Muybi3n/AI_Projects/actions)
   [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?style=flat-square&logo=python)](#)
@@ -14,29 +14,31 @@
 
 ## 📌 Overview
 
-Balancing career performance, engineering on-call rotations, and meaningful personal rest is a continuous challenge for professionals and developers:
+Balancing demanding career commitments, engineering on-call rotations, family school schedules, and meaningful personal rest is a friction-filled challenge:
 
-* **Sub-Optimal PTO Burn:** Taking random isolated Wednesdays or Fridays instead of strategically stacking PTO around federal/statutory holidays to double or triple consecutive time off.
-* **Handover & Coverage Anxiety:** Leaving on vacation without explicit project delegates, resulting in emergency Slack pings, broken on-call rotations, and stalled PRs.
-* **Out-of-Office (OOO) Writer's Block:** Scrambling to draft tone-appropriate OOO emails for clients, engineering teammates, and stakeholders 10 minutes before signing off.
-* **The Year-End Use-It-Or-Lose-It Cliff:** Forfeiting hard-earned accrued PTO days on December 31st because of unmonitored rollover caps.
+* **Holiday & School Stacking Inefficiency:** Taking random isolated days off instead of synchronizing work PTO with **Federal holidays** and **K-12 school district calendars (e.g. Fairfax County Public Schools) or university syllabi** to maximize consecutive family time off.
+* **Childcare Conflict Blindspots:** Forgetting upcoming school-specific student holidays, teacher planning days, or early releases where kids have no school, but parents have normal working days.
+* **Multi-Child Syllabus Fragmentation:** Managing different syllabi across multiple children or university courses with separate break schedules and exam periods.
+* **Handover & Coverage Anxiety:** Stepping away without structured project handovers, causing emergency on-call pings and stalled PRs.
+* **The Year-End Forfeiture Cliff:** Losing hard-earned accrued PTO days on December 31st due to unmonitored rollover caps.
 
-**`ptomax-core`** is an open-source, local-first optimization engine and CLI that solves the PTO knapsack problem, manages project delegation matrices, generates tailored OOO templates, and forecasts leave balances.
+**`ptomax-core`** is an open-source, local-first engine and CLI that solves the PTO knapsack optimization problem, parses unstructured school calendars and academic syllabi, maps project delegation matrices, generates tailored OOO emails, and predicts leave balances.
 
 ---
 
-## 🏗️ Architecture & Workflow
+## 🏗️ Architecture & Family Sync Workflow
 
 ```mermaid
 graph TD
-    A[Annual PTO Allowance & Federal Holiday Calendar] --> B[Phase 1: Holiday Stacking Optimizer]
+    A[Federal Holiday Calendars & Employer PTO Policy] --> B[Phase 1: Holiday Stacking Optimizer]
+    S[Generic School Calendars & Academic Syllabi TXT/CSV] --> B2[Phase 2: Universal Syllabus Parser]
     
-    B --> C[Phase 2: High-Leverage PTO Bridges 2.25x - 4.0x Multipliers]
-    B --> D[Phase 3: Work Handover & Coverage Delegation Matrix]
-    B --> E[Phase 4: Context-Aware OOO Email Synthesizer]
-    B --> F[Phase 5: PTO Accrual & Rollover Cliff Warning]
+    B & B2 --> C[Phase 3: Family Calendar Bridge & Childcare Conflict Radar]
+    C --> D[Phase 4: Work Handover & Coverage Delegation Matrix]
+    C --> E[Phase 5: Context-Aware OOO Email Synthesizer]
+    C --> F[Phase 6: PTO Accrual & Rollover Cliff Radar]
     
-    C & D & E & F --> G[Phase 6: AI PTO Strategist & Interactive CLI]
+    C & D & E & F --> G[Phase 7: AI PTO Strategist & Interactive CLI]
 ```
 
 ---
@@ -47,26 +49,44 @@ graph TD
 # 1. Install ptomax
 pip install -e .
 
-# 2. View your current PTO balance and calculate optimal 2026 holiday bridges
+# 2. View PTO balance and calculate optimal 2026 holiday bridges
 ptomax balance
 ptomax optimize --days 15 --year 2026
 
-# 3. Add project coverage delegates and generate an OOO email
-ptomax coverage add --project "Wazuh SOC & Threat Triage" --primary-name "Sarah Jenkins" --primary-contact "sarah@company.internal"
+# 3. Import school calendar / syllabi and check for childcare conflicts
+ptomax school import --file fcps_calendar.txt --source "Fairfax County PS" --students "Emma, Liam"
+ptomax school conflicts
+ptomax school family-breaks
+
+# 4. Generate an OOO email and consult the AI Strategist
 ptomax ooo --start 2026-07-03 --end 2026-07-12 --style external
-ptomax ask "What is the best way to get 9 days off in May?"
+ptomax ask "How can I get 9 days off in May aligned with school breaks?"
 ```
 
 ---
 
-## 🛠️ Step-by-Step CLI Features
+## 🛠️ Step-by-Step Feature Walkthrough
 
-### 1. Holiday Stacking & PTO Maximization
+### 1. Ingesting Generic School Calendars & Syllabi
 
-Transform 15 days of PTO into **45+ consecutive days of vacation** by anchoring days around standard public holidays:
+Import any school district calendar, college syllabus, or plain text date listing:
 
 ```bash
-ptomax optimize --days 15 --year 2026
+# Import from raw text or file
+ptomax school import --text "2026-10-09: Student Holiday / Teacher Planning Day
+2026-11-02 to 2026-11-03: Teacher Workday
+2026-11-25 to 2026-11-27: Thanksgiving Break
+2027-03-29 to 2027-04-02: Spring Break" \
+                     --source "Fairfax County PS" \
+                     --students "Emma, Liam"
+```
+
+### 2. Childcare Conflict Radar
+
+Automatically alerts parents when kids have no school, but parents have a normal work day (no federal holiday):
+
+```bash
+ptomax school conflicts
 ```
 
 **Example Output:**
@@ -74,56 +94,58 @@ ptomax optimize --days 15 --year 2026
 ╔══════════════════════════════════════════════════════════════════╗
 ║               🌴 PTOMAX LEAVE & HOLIDAY OPTIMIZER                ║
 ╚══════════════════════════════════════════════════════════════════╝
-Target Year: 2026 | PTO Days Budget: 15 Days
-
-╭───────────────────── 🌴 Optimized Holiday Stacking Schedule (2026) ─────────────────────╮
-│ Break Name                     Date Range              PTO Burn  Days Off  Leverage     │
-│ Memorial Day 9-Day Mega-Break  2026-05-23 to 2026-05-31  4 Days    9 Days   2.25x       │
-│ Independence Day 9-Day Mega    2026-06-27 to 2026-07-05  4 Days    9 Days   2.25x       │
-│ Labor Day 9-Day Mega-Break     2026-09-05 to 2026-09-13  4 Days    9 Days   2.25x       │
-│ Thanksgiving 9-Day Fall Break  2026-11-21 to 2026-11-29  3 Days    9 Days   3.00x       │
-╰────────────────────────────────────────────────────────────────────────────────────────╯
-
-SUMMARY: By burning 15 PTO days, you unlock 36 total consecutive days off (2.4x leverage!).
+╭──────────────────── 🚨 Childcare Conflict Radar (Workdays with No School) ────────────────────╮
+│ Date        Day       School Event                       Source School      Action Needed     │
+│ 2026-10-09  Friday    Student Holiday / Planning Day     Fairfax County PS  Plan PTO / Sitter │
+│ 2026-11-02  Monday    Teacher Workday                    Fairfax County PS  Plan PTO / Sitter │
+│ 2026-11-03  Tuesday   Teacher Workday                    Fairfax County PS  Plan PTO / Sitter │
+╰───────────────────────────────────────────────────────────────────────────────────────────────╯
+💡 Tip: Use 'ptomax ooo' or submit a PTO request for these dates before calendar slots fill up.
 ```
 
-### 2. Work Coverage & Handover Matrix
+### 3. Family Vacation Windows
 
-Ensure zero broken builds and seamless on-call coverage while you are away:
+Finds contiguous multi-day spans where kids are off school that can be easily bridged with parent PTO:
+
+```bash
+ptomax school family-breaks
+```
+
+### 4. Holiday Stacking & PTO Maximization
+
+Transforms 15 PTO days into **36–50+ consecutive days of vacation** (2.25x to 4.0x leverage):
+
+```bash
+ptomax optimize --days 15 --year 2026
+```
+
+### 5. Work Handover Delegation Matrix
 
 ```bash
 # Add coverage delegate
-ptomax coverage add --project "Production API Gateway" \
-                    --primary-name "Marcus Vance" \
-                    --primary-contact "marcus.vance@company.internal" \
+ptomax coverage add --project "Mac Mini SOC & Threat Triage" \
+                    --primary-name "Sarah Jenkins" \
+                    --primary-contact "sarah@company.internal" \
                     --threshold "P0 Outages only"
 
 # View 1-page team handover summary
 ptomax coverage list
 ```
 
-### 3. Out-of-Office (OOO) Email Generator
+### 6. Out-of-Office (OOO) Email Generator
 
-Synthesizes tailored OOO templates across styles: `external` (clients/vendors), `internal` (engineering team), `urgent` (strict offline boundary), or `witty`:
+Synthesizes tailored OOO templates across styles (`external`, `internal`, `urgent`, `witty`):
 
 ```bash
 ptomax ooo --start 2026-05-23 --end 2026-05-31 --style external
 ```
 
-### 4. Accrual & Rollover Cliff Radar
-
-Alerts you before you forfeit vacation days due to company rollover caps:
-
-```bash
-ptomax accrual
-```
-
 ---
 
-## 🔒 Local-First Privacy Directives
+## 🔒 Privacy & Local Storage
 
-* **100% Local File Storage:** All PTO balances, employer policies, and colleague coverage rosters remain strictly in `~/.ptomax/profile.json`.
-* **Zero Cloud Leakage:** No employer credentials, calendar tokens, or company confidential information are ever shared externally.
+* **100% Local File Storage:** All PTO balances, school syllabi, children's schedules, and coverage rosters remain strictly in `~/.ptomax/profile.json`.
+* **Zero Cloud Tracking:** No school portal logins, employer credentials, or personal calendar data are ever shared externally.
 
 ---
 

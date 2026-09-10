@@ -114,4 +114,5 @@ class PtoStore:
             planned_breaks=breaks,
             coverage_handovers=covs,
             custom_holidays=holidays,
+            academic_events=list(data.get("academic_events", [])),
         )

@@ -88,7 +88,7 @@ class PtoBreak:
 
 @dataclass
 class PtoProfile:
-    """User profile for PTO allowance, accruals, and handover state."""
+    """User profile for PTO allowance, accruals, handover state, and family academic events."""
 
     total_annual_allowance_days: float = 15.0
     current_balance_days: float = 12.0
@@ -98,6 +98,7 @@ class PtoProfile:
     planned_breaks: list[PtoBreak] = field(default_factory=list)
     coverage_handovers: list[WorkCoverage] = field(default_factory=list)
     custom_holidays: list[Holiday] = field(default_factory=list)
+    academic_events: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -109,6 +110,7 @@ class PtoProfile:
             "planned_breaks": [b.to_dict() for b in self.planned_breaks],
             "coverage_handovers": [c.to_dict() for c in self.coverage_handovers],
             "custom_holidays": [h.to_dict() for h in self.custom_holidays],
+            "academic_events": self.academic_events,
         }
 
 

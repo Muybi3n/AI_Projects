@@ -12,6 +12,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from .academic import AcademicEvent, AcademicEventType, FamilyCalendarBridge, SyllabusParser
 from .accrual import AccrualEngine
 from .advisor import PtoAdvisor
 from .coverage import CoverageMatrix
@@ -27,7 +28,7 @@ def print_banner() -> None:
         """
 [bold cyan]╔══════════════════════════════════════════════════════════════════╗
 ║               🌴 PTOMAX LEAVE & HOLIDAY OPTIMIZER                ║
-║      Holiday Stacking, Work Coverage & OOO Email Synthesizer     ║
+║      Holiday Stacking, School Sync & Work Handover Matrix        ║
 ╚══════════════════════════════════════════════════════════════════╝[/bold cyan]
         """
     )
@@ -36,7 +37,7 @@ def print_banner() -> None:
 def main(args_list: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="ptomax",
-        description="PTO Holiday Stacking Optimizer, Work Handover Coverage Matrix & OOO Email Synthesizer.",
+        description="PTO Holiday Stacking Optimizer, School Calendar/Syllabus Sync & Handover Matrix.",
     )
     parser.add_argument(
         "--data-dir",
@@ -71,6 +72,42 @@ def main(args_list: list[str] | None = None) -> int:
         "-y", "--year", type=int, default=2026, help="Target calendar year (default: 2026)"
     )
 
+    # school (academic calendars, syllabi & childcare conflict detector)
+    school_p = subparsers.add_parser(
+        "school", help="Manage generic school calendars, syllabi & family vacation sync"
+    )
+    school_sub = school_p.add_subparsers(dest="school_action")
+
+    school_import = school_sub.add_parser(
+        "import", help="Import school schedule, district calendar or syllabus"
+    )
+    school_import.add_argument(
+        "-f", "--file", help="Path to text or CSV file containing school schedule"
+    )
+    school_import.add_argument(
+        "-t", "--text", help="Raw inline text containing schedule or syllabus dates"
+    )
+    school_import.add_argument(
+        "-s",
+        "--source",
+        default="School Calendar",
+        help="Source name (e.g. 'Fairfax County PS', 'Stanford CS101')",
+    )
+    school_import.add_argument(
+        "--students", default="", help="Comma-separated student/child names (e.g. 'Emma, Liam')"
+    )
+    school_import.add_argument("--year", type=int, default=2026, help="Default calendar year")
+
+    school_sub.add_parser("list", help="List all parsed school events and student days off")
+    school_sub.add_parser(
+        "conflicts", help="Detect childcare conflict days (kids off school, parents working)"
+    )
+    school_sub.add_parser(
+        "family-breaks",
+        help="Find optimal family vacation windows combining school breaks & holidays",
+    )
+    school_sub.add_parser("clear", help="Clear all imported school events")
+
     # coverage
     cov_p = subparsers.add_parser(
         "coverage", help="Manage work handover and project coverage delegates"
@@ -92,7 +129,7 @@ def main(args_list: list[str] | None = None) -> int:
     cov_ready = cov_sub.add_parser("ready", help="Mark a coverage handover checklist as ready")
     cov_ready.add_argument("--id", required=True, help="Coverage ID or project name")
 
-    # ooo (out of office email generator)
+    # ooo
     ooo_p = subparsers.add_parser("ooo", help="Generate customized Out-of-Office (OOO) email")
     ooo_p.add_argument("--start", required=True, help="Vacation start date YYYY-MM-DD")
     ooo_p.add_argument("--end", required=True, help="Return date YYYY-MM-DD")
@@ -211,6 +248,158 @@ def main(args_list: list[str] | None = None) -> int:
         )
         console.print(Panel(panel_msg, title="🌟 PTO Optimization Result", border_style="green"))
         return 0
+
+    elif args.subcommand == "school":
+        if args.school_action == "import":
+            text_to_parse = ""
+            if args.file:
+                p = Path(args.file)
+                if p.is_file():
+                    text_to_parse = p.read_text(encoding="utf-8", errors="ignore")
+                else:
+                    console.print(f"[red]Error: File not found: {args.file}[/red]")
+                    return 1
+            elif args.text:
+                text_to_parse = args.text
+            else:
+                console.print("[red]Error: Must provide --file or --text to import.[/red]")
+                return 1
+
+            students = [s.strip() for s in args.students.split(",") if s.strip()]
+            events = SyllabusParser.parse_text(
+                text=text_to_parse,
+                source_label=args.source,
+                default_year=args.year,
+                students=students,
+            )
+            for ev in events:
+                profile.academic_events.append(ev.to_dict())
+            store.save_profile(profile)
+            console.print(
+                f"[green]✔ Successfully parsed & imported {len(events)} academic events from '{args.source}'.[/green]"
+            )
+            return 0
+
+        elif args.school_action == "list" or not args.school_action:
+            print_banner()
+            if not profile.academic_events:
+                console.print(
+                    "[yellow]No school calendars or syllabi imported. Use 'ptomax school import' to load schedules.[/yellow]"
+                )
+                return 0
+
+            table = Table(
+                title=f"🎓 Academic Events & School Schedule ({len(profile.academic_events)} Events)"
+            )
+            table.add_column("Event Name", style="cyan")
+            table.add_column("Dates", style="white")
+            table.add_column("Type", style="yellow")
+            table.add_column("Source", style="magenta")
+            table.add_column("Students", style="green")
+
+            for e in profile.academic_events:
+                dt_str = (
+                    e["start_date"]
+                    if e["start_date"] == e["end_date"]
+                    else f"{e['start_date']} to {e['end_date']}"
+                )
+                table.add_row(
+                    e["name"][:35],
+                    dt_str,
+                    e["event_type"],
+                    e.get("source_label", "")[:25],
+                    ", ".join(e.get("affected_students", [])) or "All",
+                )
+            console.print(table)
+            return 0
+
+        elif args.school_action == "conflicts":
+            print_banner()
+            acad_objects = [
+                AcademicEvent(
+                    id=e.get("id", ""),
+                    name=e.get("name", ""),
+                    event_type=AcademicEventType(e.get("event_type", "student_holiday")),
+                    start_date=e.get("start_date", ""),
+                    end_date=e.get("end_date", ""),
+                    source_label=e.get("source_label", ""),
+                    affected_students=e.get("affected_students", []),
+                )
+                for e in profile.academic_events
+            ]
+            bridge = FamilyCalendarBridge(acad_objects)
+            conflicts = bridge.find_childcare_conflicts()
+
+            if not conflicts:
+                console.print(
+                    "[green]✔ No childcare conflicts detected. All school off-days align with weekends or federal holidays.[/green]"
+                )
+                return 0
+
+            table = Table(
+                title=f"🚨 Childcare Conflict Radar ({len(conflicts)} Workdays with No School)"
+            )
+            table.add_column("Date", style="cyan")
+            table.add_column("Day", style="yellow")
+            table.add_column("School Event", style="white")
+            table.add_column("Source School", style="magenta")
+            table.add_column("Action Needed", style="bold red")
+
+            for c in conflicts:
+                table.add_row(
+                    c["date"],
+                    c["day_of_week"],
+                    ", ".join(c["event_names"])[:35],
+                    ", ".join(c["sources"])[:25],
+                    "Plan PTO / Childcare",
+                )
+            console.print(table)
+            console.print(
+                "\n[dim]💡 Tip: Use 'ptomax ooo' or submit a PTO request for these dates before calendar slots fill up.[/dim]\n"
+            )
+            return 0
+
+        elif args.school_action == "family-breaks":
+            print_banner()
+            acad_objects = [
+                AcademicEvent(
+                    id=e.get("id", ""),
+                    name=e.get("name", ""),
+                    event_type=AcademicEventType(e.get("event_type", "student_holiday")),
+                    start_date=e.get("start_date", ""),
+                    end_date=e.get("end_date", ""),
+                    source_label=e.get("source_label", ""),
+                )
+                for e in profile.academic_events
+            ]
+            bridge = FamilyCalendarBridge(acad_objects)
+            windows = bridge.find_family_vacation_windows()
+
+            table = Table(
+                title=f"👨‍👩‍👧‍👦 Family Vacation Windows ({len(windows)} Contiguous Breaks)"
+            )
+            table.add_column("Window Name", style="cyan")
+            table.add_column("Date Range", style="white")
+            table.add_column("Days Off", style="bold green")
+            table.add_column("PTO Needed", style="yellow")
+            table.add_column("Leverage", style="magenta")
+
+            for w in windows:
+                table.add_row(
+                    w["window_name"][:35],
+                    f"{w['start_date']} to {w['end_date']}",
+                    f"{w['total_consecutive_days_off']} Days",
+                    f"{w['pto_days_required']} Days",
+                    f"{w['leverage_multiplier']}x",
+                )
+            console.print(table)
+            return 0
+
+        elif args.school_action == "clear":
+            profile.academic_events.clear()
+            store.save_profile(profile)
+            console.print("[green]✔ Cleared all imported school events.[/green]")
+            return 0
 
     elif args.subcommand == "coverage":
         cov_matrix = CoverageMatrix(profile.coverage_handovers)
