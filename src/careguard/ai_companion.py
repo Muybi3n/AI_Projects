@@ -1,6 +1,6 @@
 # NOTE: This project is for Proof of Concept (POC) purposes only. It is not intended for production use.
 """
-AI Caregiver Medical Advocate Companion: Context compilation, doctor visit prep, and LLM adapters.
+AI Caregiver Medical Advocate Companion: Context compilation, clinical note explanation, and LLM adapters.
 """
 
 import json
@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .engine import CareEngine
+from .extractor import ExtractedClinicalPoints, NoteExtractor
 from .models import CareRecipient
 
 
@@ -29,6 +30,24 @@ class CareAdvisorResponse:
             "vitals_red_flags": self.vitals_red_flags,
             "questions_for_specialist": self.questions_for_specialist,
             "caregiver_action_plan": self.caregiver_action_plan,
+        }
+
+
+@dataclass
+class NoteExplanationResponse:
+    plain_english_translation: str
+    key_findings_summary: list[str]
+    decoded_acronyms: list[dict[str, str]]
+    next_steps_and_orders: list[str]
+    redaction_protection_applied: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "plain_english_translation": self.plain_english_translation,
+            "key_findings_summary": self.key_findings_summary,
+            "decoded_acronyms": self.decoded_acronyms,
+            "next_steps_and_orders": self.next_steps_and_orders,
+            "redaction_protection_applied": self.redaction_protection_applied,
         }
 
 
@@ -74,10 +93,77 @@ def build_care_context(recipient: CareRecipient) -> dict[str, Any]:
 
 
 class CareCompanion:
-    """AI Companion providing medical coordination and appointment prep for family caregivers."""
+    """AI Companion providing medical coordination, jargon explanation, and appointment prep."""
 
     def __init__(self, custom_llm_callable: Callable[[str, dict[str, Any]], str] | None = None):
         self.custom_llm_callable = custom_llm_callable
+
+    def explain_note(
+        self,
+        raw_note: str,
+        patient_name: str | None = None,
+        redact_sensitive_findings: bool = True,
+    ) -> NoteExplanationResponse:
+        """Translate complex doctor notes into plain English with privacy protection."""
+        extracted: ExtractedClinicalPoints = NoteExtractor.extract_from_note(
+            raw_note,
+            encounter_date="Current",
+            patient_name_hint=patient_name,
+            redact_sensitive_findings=redact_sensitive_findings,
+        )
+
+        decoded_dict = [{"acronym": d.acronym, "meaning": d.plain_english} for d in extracted.decoded_jargon]
+
+        if self.custom_llm_callable:
+            llm_payload = {
+                "sanitized_clinical_text": extracted.sanitized_text_for_llm,
+                "decoded_acronyms": decoded_dict,
+                "diagnoses": extracted.diagnoses_and_assessments,
+            }
+            prompt = (
+                "Explain the sanitized clinical note in clear, compassionate 8th-grade reading level English. "
+                "Highlight key findings, what medication changes occurred, and what tests or follow-ups are needed."
+            )
+            raw_out = self.custom_llm_callable(prompt, llm_payload)
+            return NoteExplanationResponse(
+                plain_english_translation=raw_out,
+                key_findings_summary=extracted.diagnoses_and_assessments or ["Extracted from note."],
+                decoded_acronyms=decoded_dict,
+                next_steps_and_orders=extracted.follow_up_orders_and_labs
+                or ["Follow prescribing doctor instructions."],
+                redaction_protection_applied=extracted.redaction_summary,
+            )
+
+        # Heuristic translation
+        lines = []
+        if extracted.chief_complaint:
+            lines.append(f"Visit Reason: The patient was seen for '{extracted.chief_complaint}'.")
+
+        if extracted.diagnoses_and_assessments:
+            diag_str = "; ".join(extracted.diagnoses_and_assessments)
+            lines.append(f"Doctor's Assessment: {diag_str}")
+
+        if extracted.medication_changes:
+            med_str = "; ".join(extracted.medication_changes)
+            lines.append(f"Medication Updates: {med_str}")
+
+        if extracted.follow_up_orders_and_labs:
+            ord_str = "; ".join(extracted.follow_up_orders_and_labs)
+            lines.append(f"Next Steps & Tests: {ord_str}")
+
+        if not lines:
+            lines.append("Clinical note successfully parsed. Review key findings and decoded medical shorthand below.")
+
+        translation = "\n\n".join(lines)
+
+        return NoteExplanationResponse(
+            plain_english_translation=translation,
+            key_findings_summary=extracted.diagnoses_and_assessments or ["Stable clinical encounter."],
+            decoded_acronyms=decoded_dict,
+            next_steps_and_orders=extracted.follow_up_orders_and_labs
+            or ["Follow routine preventative checkup schedule."],
+            redaction_protection_applied=extracted.redaction_summary,
+        )
 
     def consult(self, query: str, recipient: CareRecipient) -> CareAdvisorResponse:
         context = build_care_context(recipient)

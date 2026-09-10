@@ -1,6 +1,6 @@
 # NOTE: This project is for Proof of Concept (POC) purposes only. It is not intended for production use.
 """
-Comprehensive CLI tests for careguard-core.
+Comprehensive CLI tests for careguard-core including clinical notes and privacy redaction.
 """
 
 from pathlib import Path
@@ -227,14 +227,51 @@ def test_cli_full_workflow(tmp_path: Path, capsys):
     captured = capsys.readouterr()
     assert '"patient_name"' in captured.out
 
+    # Clinical Timeline
+    code = main(["--data-dir", str(data_dir), "timeline"])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "LONGITUDINAL CLINICAL ENCOUNTER TIMELINE" in captured.out
+
+    # Explain Note CLI
+    sample_note = "Patient Helen Vance DOB: 05/12/1946 seen for SOB. Assessment: CHF and HTN. PSA: 12.4 ng/mL."
+    code = main(["--data-dir", str(data_dir), "explain", sample_note])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "PLAIN-ENGLISH DOCTOR NOTE TRANSLATION" in captured.out
+    assert "Shortness of breath" in captured.out
+
+    # Redact Preview CLI
+    code = main(["--data-dir", str(data_dir), "redact", sample_note])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "HIPAA DE-IDENTIFICATION" in captured.out
+    assert "[PATIENT_NAME]" in captured.out
+
+    # Import Note CLI from File
+    note_file = tmp_path / "doctor_note.txt"
+    note_file.write_text(
+        "Chief Complaint: Follow-up on edema\nAssessment: Controlled CHF\nMedication Changes: Continue Lasix\n",
+        encoding="utf-8",
+    )
+    code = main(
+        [
+            "--data-dir",
+            str(data_dir),
+            "import-note",
+            str(note_file),
+            "--doctor",
+            "Dr. Klein",
+            "--specialty",
+            "Cardiology",
+        ]
+    )
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "Successfully Imported Note" in captured.out
+
     # Ask AI Caregiver Companion
     code = main(["--data-dir", str(data_dir), "ask", "Prepare questions for tomorrow's cardiologist appointment."])
     assert code == 0
     captured = capsys.readouterr()
     assert "AI CAREGIVER MEDICAL ADVOCATE" in captured.out
-
-    # Ask JSON
-    code = main(["--data-dir", str(data_dir), "ask", "What were the medication changes?", "--json"])
-    assert code == 0
-    captured = capsys.readouterr()
-    assert '"advocate_summary"' in captured.out

@@ -10,7 +10,9 @@ from pathlib import Path
 
 from . import __version__
 from .ai_companion import CareCompanion
+from .deid import ClinicalRedactor
 from .engine import CareEngine
+from .extractor import NoteExtractor
 from .models import (
     CaregiverNote,
     DailyVitalsLog,
@@ -21,6 +23,7 @@ from .models import (
     TimingSlot,
 )
 from .storage import CareStore
+from .timeline import ClinicalTimelineEngine
 
 
 def print_banner():
@@ -132,6 +135,33 @@ def main(argv: list[str] | None = None) -> int:
     brief_p = subparsers.add_parser("brief", help="Generate 1-page physician appointment prep briefing sheet.")
     brief_p.add_argument("--json", action="store_true", help="Output raw JSON.")
 
+    # Timeline
+    tl_p = subparsers.add_parser("timeline", help="Display longitudinal clinical progression timeline.")
+    tl_p.add_argument("--json", action="store_true", help="Output raw JSON.")
+
+    # Explain Doctor Note (Privacy-preserving jargon decoder)
+    exp_p = subparsers.add_parser(
+        "explain", help="Safely de-identify and explain a complex doctor note in plain English."
+    )
+    exp_p.add_argument("note", help="Raw clinical note text or path to .txt note file.")
+    exp_p.add_argument("--no-mask-labs", action="store_true", help="Disable masking of sensitive lab numbers.")
+    exp_p.add_argument("--json", action="store_true", help="Output raw JSON.")
+
+    # Redact Preview
+    red_p = subparsers.add_parser("redact", help="Preview HIPAA de-identification and sensitive finding redaction.")
+    red_p.add_argument("note", help="Raw clinical note text or path to .txt note file.")
+
+    # Import Note
+    imp_p = subparsers.add_parser(
+        "import-note", help="Import doctor note, extract clinical points, and save to patient record."
+    )
+    imp_p.add_argument("file", type=Path, help="Text file containing physician visit note.")
+    imp_p.add_argument("--doctor", default="Specialist", help="Physician name")
+    imp_p.add_argument(
+        "--specialty", default="Specialty Care", help="Specialty (Cardiology, Neurology, Oncology, etc.)"
+    )
+    imp_p.add_argument("--date", default=None, help="Encounter date (YYYY-MM-DD)")
+
     # Ask
     ask_p = subparsers.add_parser("ask", help="Consult the AI Caregiver Medical Companion.")
     ask_p.add_argument("query", help="Question about care regimen, doctor visit summaries, or vitals.")
@@ -140,6 +170,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     store = CareStore(args.data_dir)
     recipient = store.load_recipient()
+
+    # Helper to resolve text vs file
+    def resolve_text_input(input_val: str) -> str:
+        p = Path(input_val)
+        if p.exists() and p.is_file():
+            try:
+                return p.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                pass
+        return input_val
 
     # Init
     if args.command == "init":
@@ -365,6 +405,115 @@ def main(argv: list[str] | None = None) -> int:
         for q in briefing.recommended_discussion_points:
             print(f"    [ ] {q}")
         print("=" * 75 + "\n")
+        return 0
+
+    # Timeline
+    if args.command == "timeline":
+        report = ClinicalTimelineEngine.build_timeline(recipient)
+        if args.json:
+            print(json.dumps(report.to_dict(), indent=2))
+            return 0
+
+        print("\n" + "=" * 75)
+        print(f"        LONGITUDINAL CLINICAL ENCOUNTER TIMELINE ({report.patient_name})        ")
+        print("=" * 75)
+        print(f"  Total Encounters Logged : {report.total_encounters}")
+        print(f"  Chronological Span      : {report.first_recorded_encounter} to {report.latest_recorded_encounter}")
+        print("─" * 75)
+        for e in report.encounters:
+            print(f"\n📅 [{e.date}] {e.physician} ({e.specialty}) - Reason: {e.chief_complaint}")
+            print(f"   Findings     : {e.clinical_summary}")
+            if e.medications_altered:
+                print(f"   Med Changes  : {', '.join(e.medications_altered)}")
+            if e.tests_requested:
+                print(f"   Tests/Orders : {', '.join(e.tests_requested)}")
+        print("\n" + "=" * 75 + "\n")
+        return 0
+
+    # Explain Doctor Note
+    if args.command == "explain":
+        raw_text = resolve_text_input(args.note)
+        companion = CareCompanion()
+        resp = companion.explain_note(
+            raw_text,
+            patient_name=recipient.full_name,
+            redact_sensitive_findings=not args.no_mask_labs,
+        )
+
+        if args.json:
+            print(json.dumps(resp.to_dict(), indent=2))
+            return 0
+
+        print("\n" + "━" * 75)
+        print("📖 PLAIN-ENGLISH DOCTOR NOTE TRANSLATION (PRIVACY-PROTECTED)")
+        print("━" * 75)
+        print(f"\n🎯 SUMMARY & TRANSLATION:\n{resp.plain_english_translation}\n")
+        if resp.decoded_acronyms:
+            print("🔤 DECODED MEDICAL ACRONYMS & JARGON:")
+            for d in resp.decoded_acronyms:
+                print(f"  • {d['acronym']:<8} -> {d['meaning']}")
+            print()
+        if resp.key_findings_summary:
+            print("📋 KEY CLINICAL FINDINGS:")
+            for k in resp.key_findings_summary:
+                print(f"  • {k}")
+            print()
+        if resp.next_steps_and_orders:
+            print("⚡ NEXT STEPS & DOCTOR'S ORDERS:")
+            for n in resp.next_steps_and_orders:
+                print(f"  • {n}")
+            print()
+        print(
+            f"🛡️ PRIVACY SHIELD APPLIED: {resp.redaction_protection_applied.get('phi_redacted_count', 0)} PHI items masked | {resp.redaction_protection_applied.get('sensitive_findings_redacted_count', 0)} sensitive lab/cancer findings protected."
+        )
+        print("━" * 75 + "\n")
+        return 0
+
+    # Redact Preview
+    if args.command == "redact":
+        raw_text = resolve_text_input(args.note)
+        res = ClinicalRedactor.deidentify(raw_text, patient_name_hint=recipient.full_name)
+        print("\n" + "=" * 75)
+        print("            HIPAA DE-IDENTIFICATION & SENSITIVE FINDING PREVIEW          ")
+        print("=" * 75)
+        print(f"\n🔒 SANITIZED TEXT (Safe for LLM):\n{res.sanitized_text}\n")
+        print("─" * 75)
+        print(f"🛡️ REDACTED PHI IDENTIFIERS ({len(res.redacted_phi_items)}):")
+        for phi in res.redacted_phi_items:
+            print(f"  • {phi}")
+        print(f"\n🧪 REDACTED SENSITIVE FINDINGS ({len(res.redacted_sensitive_findings)}):")
+        for fnd in res.redacted_sensitive_findings:
+            print(f"  • {fnd}")
+        print("=" * 75 + "\n")
+        return 0
+
+    # Import Note
+    if args.command == "import-note":
+        if not args.file.exists():
+            print(f"Error: Note file '{args.file}' not found.", file=sys.stderr)
+            return 1
+
+        content = args.file.read_text(encoding="utf-8", errors="replace")
+        extracted = NoteExtractor.extract_from_note(
+            content, encounter_date=args.date or DoctorVisit().date, patient_name_hint=recipient.full_name
+        )
+
+        visit = DoctorVisit(
+            date=extracted.encounter_date,
+            physician_name=args.doctor,
+            specialty=args.specialty,
+            reason_for_visit=extracted.chief_complaint,
+            physician_findings="; ".join(extracted.diagnoses_and_assessments)
+            if extracted.diagnoses_and_assessments
+            else "Clinical Encounter",
+            medication_changes=", ".join(extracted.medication_changes),
+            orders_and_tests=", ".join(extracted.follow_up_orders_and_labs),
+        )
+        recipient.doctor_visits.append(visit)
+        store.save_recipient(recipient)
+        print(f"[✓] Successfully Imported Note: [{visit.date}] {visit.physician_name} ({visit.specialty})")
+        print(f"    Chief Complaint : {visit.reason_for_visit}")
+        print(f"    Findings Extracted: {visit.physician_findings[:60]}...")
         return 0
 
     # Ask
