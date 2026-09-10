@@ -62,6 +62,28 @@ graph TD
 
 ---
 
+## 🌟 30-Second Beginner Quickstart
+
+Get up and running in 3 copy-paste steps:
+
+```bash
+# 1. Install medcadence
+pip install -e .
+
+# 2. Initialize your profile and add a lab result
+medcadence init --label "Alex" --sex male --birth-year 1990
+medcadence lab add --name "LDL Cholesterol" --value 135 --high 100 --unit "mg/dL"
+medcadence lab trends
+
+# 3. Audit prescriptions/supplements and ask the AI companion
+medcadence med add --name "Atorvastatin" --dosage "20mg"
+medcadence med add --name "Grapefruit Juice" --supplement
+medcadence med audit
+medcadence ask "What questions should I ask my doctor?"
+```
+
+---
+
 ## 🛠️ Step-by-Step Implementation Guide
 
 ### Phase 1: Installation & Setup
