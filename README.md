@@ -3,8 +3,8 @@
   <h1>⚡ sparsededup</h1>
   <p><strong>High-Throughput Sparse-Block Deduplication & Integrity Scanner for Terabyte Arrays and Media Stores</strong></p>
 
-  [![CI Pipeline](https://img.shields.io/badge/CI-Passing-success?style=flat-square&logo=github-actions)](https://github.com/Muybi3n/sparsededup/actions)
-  [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?style=flat-square&logo=python)](https://pypi.org/project/sparsededup/)
+  [![CI Pipeline](https://img.shields.io/badge/CI-Passing-success?style=flat-square&logo=github-actions)](https://github.com/Muybi3n/AI_Projects/actions)
+  [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?style=flat-square&logo=python)](#)
   [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-000000?style=flat-square)](https://github.com/astral-sh/ruff)
   [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
   [![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)](#)
@@ -72,11 +72,11 @@ You can run `sparsededup` directly without permanent installation via `uvx` / `p
 
 ```bash
 # Option A: Run directly with uvx (fastest, zero install footprint)
-uvx git+https://github.com/Muybi3n/sparsededup.git --help
+uvx git+https://github.com/Muybi3n/AI_Projects.git --help
 
 # Option B: Install via pip
-git clone https://github.com/Muybi3n/sparsededup.git
-cd sparsededup
+git clone https://github.com/Muybi3n/AI_Projects.git
+cd AI_Projects
 pip install .
 ```
 

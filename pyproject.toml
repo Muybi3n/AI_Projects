@@ -52,9 +52,9 @@ dev = [
 sparsededup = "sparsededup.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Muybi3n/sparsededup"
-Repository = "https://github.com/Muybi3n/sparsededup"
-"Bug Tracker" = "https://github.com/Muybi3n/sparsededup/issues"
+Homepage = "https://github.com/Muybi3n/AI_Projects"
+Repository = "https://github.com/Muybi3n/AI_Projects"
+"Bug Tracker" = "https://github.com/Muybi3n/AI_Projects/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

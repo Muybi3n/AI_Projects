@@ -8,8 +8,8 @@ Thank you for your interest in contributing to `sparsededup`! We welcome contrib
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Muybi3n/sparsededup.git
-   cd sparsededup
+   git clone https://github.com/Muybi3n/AI_Projects.git
+   cd AI_Projects
    ```
 
 2. **Set up a virtual environment:**
