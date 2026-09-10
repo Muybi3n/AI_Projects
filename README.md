@@ -63,6 +63,26 @@ graph TD
 
 ---
 
+## 🌟 30-Second Beginner Quickstart
+
+Get up and running in 3 copy-paste steps:
+
+```bash
+# 1. Install trustguard
+pip install -e .
+
+# 2. Initialize your family trust and add a property
+trustguard init --name "The Henderson Family Revocable Living Trust" --grantor "Robert Henderson"
+trustguard asset add --name "Primary Home" --category real_estate --value 850000 --titling titled_to_trust
+trustguard asset add --name "Startup LLC" --category business_equity_llc --value 250000 --titling unfunded_probate_risk
+
+# 3. Audit probate court risk and ask the AI companion
+trustguard asset audit
+trustguard ask "What assets are at risk of probate?"
+```
+
+---
+
 ## 🛠️ Step-by-Step Implementation Guide
 
 ### Phase 1: Installation & Setup
