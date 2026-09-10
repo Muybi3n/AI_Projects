@@ -16,6 +16,7 @@ from .models import (
     BeneficiaryRule,
     DistributionScheme,
     FiduciaryLogEntry,
+    GuardianshipDirective,
     ScheduleAsset,
     TitlingStatus,
     TrustEntity,
@@ -92,6 +93,19 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     ben_sub.add_parser("list", help="List all designated beneficiaries.")
+
+    # Guardianship & Family Planning
+    guard_p = subparsers.add_parser("guardianship", help="Manage minor child guardianship and family directives.")
+    guard_sub = guard_p.add_subparsers(dest="subcommand", required=True)
+
+    guard_add = guard_sub.add_parser("add", help="Add minor guardianship directive.")
+    guard_add.add_argument("--child", required=True, help="Minor child full name")
+    guard_add.add_argument("--dob", default="", help="Date of birth (YYYY-MM-DD)")
+    guard_add.add_argument("--guardian", required=True, help="Primary designated legal guardian")
+    guard_add.add_argument("--alternate", default="", help="Alternate / successor guardian")
+    guard_add.add_argument("--notes", default="", help="Special health/care/educational instructions")
+
+    guard_sub.add_parser("list", help="List all designated guardianship directives.")
 
     # Waterfall
     wf_p = subparsers.add_parser("waterfall", help="Simulate beneficiary distribution waterfall.")
@@ -241,6 +255,30 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 print(f"[{b.id}] {b.beneficiary_name:<22} ({b.relationship:<8}) : {share_str:<12} | {b.scheme.value}")
             print("=" * 75 + "\n")
+            return 0
+
+    # Guardianship
+    if args.command == "guardianship":
+        if args.subcommand == "add":
+            directive = GuardianshipDirective(
+                child_name=args.child,
+                date_of_birth=args.dob,
+                primary_guardian=args.guardian,
+                alternate_guardian=args.alternate,
+                special_care_instructions=args.notes,
+            )
+            trust.guardianship_directives.append(directive)
+            store.save_trust(trust)
+            print(f"[✓] Added Guardianship Directive for '{directive.child_name}' -> Primary Guardian: {directive.primary_guardian}")
+            return 0
+
+        elif args.subcommand == "list":
+            print(f"\nMinor Guardianship Directives for '{trust.trust_name}':")
+            print("=" * 80)
+            for g in trust.guardianship_directives:
+                alt = f" (Alt: {g.alternate_guardian})" if g.alternate_guardian else ""
+                print(f"[{g.id}] Child: {g.child_name:<20} | Guardian: {g.primary_guardian:<20}{alt}")
+            print("=" * 80 + "\n")
             return 0
 
     # Waterfall

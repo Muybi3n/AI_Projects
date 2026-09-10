@@ -62,6 +62,19 @@ class ScheduleAsset:
 
 
 @dataclass
+class GuardianshipDirective:
+    id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
+    child_name: str = ""
+    date_of_birth: str = ""
+    primary_guardian: str = ""
+    alternate_guardian: str = ""
+    special_care_instructions: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class BeneficiaryRule:
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     beneficiary_name: str = ""
@@ -137,6 +150,7 @@ class TrustEntity:
     created_date: str = field(default_factory=lambda: datetime.now(timezone.utc).date().isoformat())
     assets: list[ScheduleAsset] = field(default_factory=list)
     beneficiaries: list[BeneficiaryRule] = field(default_factory=list)
+    guardianship_directives: list[GuardianshipDirective] = field(default_factory=list)
     fiduciary_logs: list[FiduciaryLogEntry] = field(default_factory=list)
 
     @property
@@ -155,5 +169,6 @@ class TrustEntity:
             "created_date": self.created_date,
             "assets": [a.to_dict() for a in self.assets],
             "beneficiaries": [b.to_dict() for b in self.beneficiaries],
+            "guardianship_directives": [g.to_dict() for g in self.guardianship_directives],
             "fiduciary_logs": [log.to_dict() for log in self.fiduciary_logs],
         }

@@ -93,6 +93,19 @@ def test_cli_full_workflow(tmp_path: Path, capsys):
     captured = capsys.readouterr()
     assert "Charlie" in captured.out
 
+    # Add Guardianship Directive
+    code = main(["--data-dir", str(data_dir), "guardianship", "add", "--child", "Oliver Smith", "--guardian", "Uncle David", "--alternate", "Aunt Sarah"])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "Added Guardianship Directive" in captured.out
+
+    # List Guardianship
+    code = main(["--data-dir", str(data_dir), "guardianship", "list"])
+    assert code == 0
+    captured = capsys.readouterr()
+    assert "Oliver Smith" in captured.out
+    assert "Uncle David" in captured.out
+
     # Waterfall
     code = main(["--data-dir", str(data_dir), "waterfall"])
     assert code == 0

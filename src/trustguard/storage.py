@@ -12,6 +12,7 @@ from .models import (
     BeneficiaryRule,
     DistributionScheme,
     FiduciaryLogEntry,
+    GuardianshipDirective,
     ScheduleAsset,
     TitlingStatus,
     TrustEntity,
@@ -96,6 +97,18 @@ class TrustStore:
             for log in d.get("fiduciary_logs", [])
         ]
 
+        guardianship_directives = [
+            GuardianshipDirective(
+                id=g["id"],
+                child_name=g.get("child_name", ""),
+                date_of_birth=g.get("date_of_birth", ""),
+                primary_guardian=g.get("primary_guardian", ""),
+                alternate_guardian=g.get("alternate_guardian", ""),
+                special_care_instructions=g.get("special_care_instructions", ""),
+            )
+            for g in d.get("guardianship_directives", [])
+        ]
+
         return TrustEntity(
             id=d.get("id", ""),
             trust_name=d.get("trust_name", "Revocable Living Trust"),
@@ -107,5 +120,6 @@ class TrustStore:
             created_date=d.get("created_date", ""),
             assets=assets,
             beneficiaries=beneficiaries,
+            guardianship_directives=guardianship_directives,
             fiduciary_logs=fiduciary_logs,
         )
