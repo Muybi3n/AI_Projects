@@ -71,6 +71,24 @@ graph TD
 
 ---
 
+## 🌟 30-Second Beginner Quickstart
+
+Get up and running in 3 copy-paste steps:
+
+```bash
+# 1. Install capdrift
+pip install -e .
+
+# 2. Ingest your downloaded broker CSV (Robinhood, Schwab, Fidelity, etc.)
+capdrift ingest portfolio.csv --broker Robinhood
+
+# 3. Run a complete health audit and ask the AI companion
+capdrift audit
+capdrift ask "Where is my biggest concentration risk?"
+```
+
+---
+
 ## 🛠️ Step-by-Step Implementation Guide
 
 ### Phase 1: Installation & Setup
