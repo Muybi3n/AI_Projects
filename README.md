@@ -23,6 +23,7 @@ This repository hosts a curated collection of production-grade, local-first Pyth
 | Project | Domain | Key Capabilities | Branch Link |
 | :--- | :--- | :--- | :--- |
 | **`sparsededup`** | Storage & Systems | 3-Point Sparse-Block BLAKE2b/SHA-256 deduplication for multi-terabyte arrays. | [`main`](https://github.com/Muybi3n/AI_Projects/tree/main) |
+| **`cardroute-engine`** | Credit Cards & Points | Dynamic spend routing optimizer, Chase 5/24 rule auditor, SUB minimum spend tracker & wallet audit. | [`cardroute-engine`](https://github.com/Muybi3n/AI_Projects/tree/cardroute-engine) |
 | **`flowbalance-core`** | Personal Finance | Deterministic cash flow forecasting, solvency runway stress-testing, FTS5 search & AI advisor. | [`flowbalance-core`](https://github.com/Muybi3n/AI_Projects/tree/flowbalance-core) |
 | **`capdrift-engine`** | Investment Portfolios | Broker CSV ingestion (Robinhood, Schwab, etc.), HHI concentration, drift rebalancing & dividend snowball. | [`capdrift-engine`](https://github.com/Muybi3n/AI_Projects/tree/capdrift-engine) |
 | **`trustguard-core`** | Wills, Trusts & Family Planning | Schedule A asset titling, probate risk detection, beneficiary waterfalls, minor guardianship & fiduciary logs. | [`trustguard-core`](https://github.com/Muybi3n/AI_Projects/tree/trustguard-core) |
