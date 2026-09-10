@@ -76,6 +76,26 @@ graph TD
 
 ---
 
+## 🌟 30-Second Beginner Quickstart
+
+Get up and running in 3 easy copy-paste steps:
+
+```bash
+# 1. Install flowbalance
+pip install -e .
+
+# 2. Add your starting balance and monthly expenses
+flowbalance account add --name "Primary Checking" --balance 8000
+flowbalance expense add --name "Rent" --amount 2200 --frequency monthly
+flowbalance income add --name "Salary" --amount 4500 --frequency biweekly --tax-pct 20
+
+# 3. View your 180-day cash curve and ask the AI advisor
+flowbalance forecast --days 180
+flowbalance ask "What is my emergency runway?"
+```
+
+---
+
 ## 🛠️ Step-by-Step Implementation Guide
 
 ### Phase 1: Installation & Setup
