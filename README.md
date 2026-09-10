@@ -1,174 +1,181 @@
 <div align="center">
   <div>&nbsp;</div>
-  <h1>⚡ sparsededup</h1>
-  <p><strong>High-Throughput Sparse-Block Deduplication & Integrity Scanner for Terabyte Arrays and Media Stores</strong></p>
+  <h1>🚀 AI Projects & Engineering Portfolio</h1>
+  <p><strong>A Showcase of Local-First, Privacy-Preserving AI Engines, Data Systems & Utility Tools</strong></p>
 
   [![CI Pipeline](https://img.shields.io/badge/CI-Passing-success?style=flat-square&logo=github-actions)](https://github.com/Muybi3n/AI_Projects/actions)
   [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?style=flat-square&logo=python)](#)
   [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-000000?style=flat-square)](https://github.com/astral-sh/ruff)
   [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-  [![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)](#)
+  [![Built For](https://img.shields.io/badge/Architecture-100%25%20Local--First-orange?style=flat-square)](#)
 </div>
 
 ---
 
-> **⚠️ NOTE:** This project is for **Proof of Concept (POC)** and exploratory engineering purposes. While rigorously tested, always perform a `--dry-run` or verify backup snapshots before executing bulk destructive filesystem operations (`--delete`).
+## 🌟 Welcome to the Portfolio!
+
+This repository hosts a curated collection of production-grade, local-first Python packages. Each project is designed with **zero hardcoded credentials**, **offline-first deterministic math/logic**, **SQLite FTS5 full-text search**, and **pluggable local/cloud AI companion capabilities** (supporting Ollama, vLLM, and OpenAI-compatible endpoints).
 
 ---
 
-## 📌 Overview
+## 🗂️ Portfolio Project Directory
 
-Traditional deduplication utilities (e.g., `fdupes`, naive full SHA-256 scanners) crawl entire files sequentially. When applied to multi-terabyte homelabs, NAS arrays, or media libraries containing 20GB–50GB video archives and ISOs, full cryptographic hashing saturates disk I/O, spikes memory, and takes hours.
-
-**`sparsededup`** eliminates 99.8% of non-matching candidates in milliseconds using a deterministic **3-Stage Hashing Pipeline**:
-1. **O(1) Size Partitioning:** Group files strictly by exact byte size; unique file sizes are immediately discarded.
-2. **3-Point Sparse Hashing:** Reads only 256 KB from the file **Header**, exact **Midpoint**, and **Footer**, producing an ultra-fast composite BLAKE2b fingerprint with zero full-disk reads.
-3. **Targeted Cryptographic SHA-256 Validation:** Performs streaming SHA-256 verification **only** on confirmed sparse-block candidate clusters before any action is executed.
-
----
-
-## 🏗️ Architecture & Pipeline Flow
-
-```mermaid
-graph TD
-    A[Root Directory / Storage Target] --> B[Phase 1: Discovery & Size Grouping]
-    B -->|Unique File Sizes| C[Discarded / Early Exit]
-    B -->|Size Collisions| D[Phase 2: 3-Point Sparse Hashing]
-    
-    subgraph "Sparse 3-Block Sampling (256 KB Each)"
-        D --> D1[1. Read Header Block]
-        D1 --> D2[2. Seek Midpoint Block]
-        D2 --> D3[3. Seek Footer Block]
-        D3 --> D4[Generate 20-Byte BLAKE2b Digest]
-    end
-    
-    D4 -->|Unique Sparse Hash| E[Discarded / Early Exit]
-    D4 -->|Sparse Hash Match| F[Phase 3: Streaming SHA-256 Verification]
-    
-    F --> G{Cluster Action Mode}
-    G -->|--dry-run| H[Terminal Report & JSON Manifest]
-    G -->|--hardlink| I[Atomic Hardlink Deduplication]
-    G -->|--symlink| J[Symbolic Link Deduplication]
-    G -->|--delete| K[Safe Duplicate Removal]
-```
+| Project | Domain | Key Capabilities | Branch Link |
+| :--- | :--- | :--- | :--- |
+| **`sparsededup`** | Storage & Systems | 3-Point Sparse-Block BLAKE2b/SHA-256 deduplication for multi-terabyte arrays. | [`main`](https://github.com/Muybi3n/AI_Projects/tree/main) |
+| **`flowbalance-core`** | Personal Finance | Deterministic cash flow forecasting, solvency runway stress-testing, FTS5 search & AI advisor. | [`flowbalance-core`](https://github.com/Muybi3n/AI_Projects/tree/flowbalance-core) |
+| **`capdrift-engine`** | Investment Portfolios | Broker CSV ingestion (Robinhood, Schwab, etc.), HHI concentration, drift rebalancing & dividend snowball. | [`capdrift-engine`](https://github.com/Muybi3n/AI_Projects/tree/capdrift-engine) |
+| **`trustguard-core`** | Wills, Trusts & Family Planning | Schedule A asset titling, probate risk detection, beneficiary waterfalls, minor guardianship & fiduciary logs. | [`trustguard-core`](https://github.com/Muybi3n/AI_Projects/tree/trustguard-core) |
+| **`medcadence-core`** | Healthcare & Telemetry | Lab bloodwork biomarker tracking, medication/supplement interaction safety checks & emergency cards. | [`medcadence-core`](https://github.com/Muybi3n/AI_Projects/tree/medcadence-core) |
+| **`lexicast-engine`** | Audio NLP & Knowledge | 5-Layer podcast audio transcription distillation and BM25 full-text search indexing. | [`lexicast-engine`](https://github.com/Muybi3n/AI_Projects/tree/lexicast-engine) |
 
 ---
 
-## 🚀 Key Features
+## ⚡ 60-Second Quickstart (Beginner-Friendly)
 
-* **⚡ Ultra-Low Disk I/O:** 3-point sparse sampling reads under 1MB per candidate file during candidate filtering.
-* **🛡️ Zero False Positives:** Full streaming SHA-256 cryptographic check guarantees identical data before linking or deleting.
-* **🔗 Non-Destructive Deduplication:** Replace duplicate copies with atomic filesystem hardlinks—reclaiming storage blocks instantly while keeping file paths and folder structures intact.
-* **📦 Zero Dependencies:** Core engine uses Python Standard Library only. Runs anywhere instantly (`uvx`, `pipx`, `pip`).
-* **📊 Machine-Readable Audits:** Export full scan manifests to JSON (`--json-out manifest.json`) for downstream scripting and automated cron storage reporting.
+All projects follow modern Python standards and require **Python 3.10+**.
 
----
-
-## 🛠️ Step-by-Step Implementation Guide
-
-### Phase 1: Installation & Setup
-
-You can run `sparsededup` directly without permanent installation via `uvx` / `pipx`, or install it into your active environment:
-
+### Step 1: Clone the Repository
 ```bash
-# Option A: Run directly with uvx (fastest, zero install footprint)
-uvx git+https://github.com/Muybi3n/AI_Projects.git --help
-
-# Option B: Install via pip
 git clone https://github.com/Muybi3n/AI_Projects.git
 cd AI_Projects
-pip install .
 ```
 
-### Phase 2: Running a Safe Dry-Run Scan
-
-Scan target directories to calculate potential space savings without touching the filesystem:
-
+### Step 2: Switch to Any Project Branch
 ```bash
-# Scan single directory
-sparsededup /mnt/media --dry-run
+# Example: Switch to the Healthcare project
+git checkout medcadence-core
 
-# Scan multiple mount points with size filters (e.g. files >= 50MB)
-sparsededup /mnt/nas/videos /mnt/backup/media --min-size 50MB
+# Or switch to the Wills & Trusts project
+git checkout trustguard-core
+
+# Or switch to the Investment Portfolio Companion
+git checkout capdrift-engine
+
+# Or switch to Cash Flow & Finance
+git checkout flowbalance-core
 ```
 
-**Example Terminal Output:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  sparsededup v0.1.0                                         │
-│  High-Throughput Sparse-Block Deduplication Engine          │
-└─────────────────────────────────────────────────────────────┘
-
-[+] Stage 1 (Discovery): Scanned 1,420 files. Found 42 size candidates.
-[*] Stage 2 (Sparse Hash): Evaluating 42 candidates with 3-block sampling...
-[+] Stage 2 (Sparse Hash): 6 candidate files matched sparse signatures.
-[*] Stage 3 (Full SHA-256): Cryptographically validating 6 files...
-[+] Stage 3 (Full SHA-256): Identified 3 verified duplicate cluster(s).
-
-===============================================================
-                      SCAN SUMMARY                      
-===============================================================
-  Total Files Scanned      : 1,420
-  Total Data Scanned       : 842.10 GB
-  Duplicate Clusters Found : 3
-  Redundant Duplicate Files: 3
-  Reclaimable Disk Space   : 74.20 GB
-===============================================================
-
-[i] Mode: Dry Run (No filesystem modifications made).
-```
-
-### Phase 3: Executing Deduplication
-
-#### 1. Atomic Hardlink Replacement (Recommended for Same-Filesystem)
-Replaces redundant duplicates with atomic hardlinks. Reclaims raw disk blocks while keeping files accessible at their original paths:
-
+### Step 3: Install in 1 Command
 ```bash
-sparsededup /mnt/nas/videos --hardlink --min-size 10MB
-```
-
-#### 2. Symbolic Link Replacement
-Replaces duplicates with symlinks to the canonical oldest file:
-
-```bash
-sparsededup /mnt/nas/staging --symlink --min-size 1MB
-```
-
-#### 3. Duplicate Removal
-Permanently deletes redundant copies, preserving the oldest original file:
-
-```bash
-sparsededup /mnt/scratch/downloads --delete
-```
-
-### Phase 4: Exporting JSON Manifests for Automation
-
-```bash
-sparsededup /mnt/storage --json-out /var/log/dedup_manifest.json --quiet
+pip install -e .
 ```
 
 ---
 
-## 🧪 Benchmark Comparison
+## 📖 Quick Interactive Examples
 
-| Metric | Traditional Full SHA-256 | `sparsededup` (3-Point Sparse) | Improvement |
-| :--- | :--- | :--- | :--- |
-| **Disk Read (1TB, 100 10GB files, 2 dups)** | 1,000 GB I/O read | **~40.5 GB I/O read** | **~96% I/O reduction** |
-| **Scan Time (HDD NAS 150MB/s)** | ~111 minutes | **~4.5 minutes** | **24x faster** |
-| **False Positive Rate** | 0.0% | **0.0%** (guaranteed via Stage 3 SHA-256) | Identical Safety |
+### 1. 💰 Personal Cash Flow & Solvency (`flowbalance-core`)
+```bash
+git checkout flowbalance-core && pip install -e .
+
+# Add your checking balance and monthly rent
+flowbalance account add --name "Primary Checking" --balance 8500
+flowbalance expense add --name "Rent & Utilities" --amount 2200 --frequency monthly
+
+# Forecast your cash runway for the next 180 days
+flowbalance forecast --days 180
+
+# Ask the AI financial advisor
+flowbalance ask "How long is my runway if I cut discretionary spending by 30%?"
+```
+
+### 2. 🧭 Investment Portfolio Companion (`capdrift-engine`)
+```bash
+git checkout capdrift-engine && pip install -e .
+
+# Ingest your downloaded broker CSV (Robinhood, Charles Schwab, Fidelity, etc.)
+capdrift ingest portfolio.csv --broker Robinhood
+
+# Run a complete health, concentration, and allocation drift audit
+capdrift audit
+
+# Simulate compounding dividend growth over 5 years
+capdrift dividends --years 5
+
+# Ask the AI portfolio companion
+capdrift ask "Where is my biggest uncompensated risk?"
+```
+
+### 3. 🏛️ Wills, Trusts & Family Planning (`trustguard-core`)
+```bash
+git checkout trustguard-core && pip install -e .
+
+# Initialize your family trust
+trustguard init --name "The Henderson Family Revocable Living Trust" --grantor "Robert Henderson"
+
+# Add a house and audit probate court risk
+trustguard asset add --name "Family Home" --category real_estate --value 750000 --titling titled_to_trust
+trustguard asset add --name "LLC Business Equity" --category business_equity_llc --value 300000 --titling unfunded_probate_risk
+trustguard asset audit
+
+# Add minor child guardianship directive
+trustguard guardianship add --child "Oliver Henderson" --guardian "Uncle David" --alternate "Aunt Sarah"
+
+# Ask the AI estate companion
+trustguard ask "What steps must the trustee take to avoid probate?"
+```
+
+### 4. 🩺 Healthcare Telemetry & Lab Tracker (`medcadence-core`)
+```bash
+git checkout medcadence-core && pip install -e .
+
+# Initialize your profile
+medcadence init --label "Alex" --sex male --birth-year 1990
+
+# Log bloodwork results (e.g. LDL cholesterol)
+medcadence lab add --name "LDL Cholesterol" --value 135 --high 100 --unit "mg/dL"
+medcadence lab trends
+
+# Audit your prescriptions and OTC supplements for dangerous interactions
+medcadence med add --name "Atorvastatin" --dosage "20mg"
+medcadence med add --name "Grapefruit Juice" --supplement
+medcadence med audit
+
+# Ask the AI healthcare companion
+medcadence ask "What questions should I ask my doctor about my lipid panel?"
+```
+
+### 5. ⚡ Sparse Storage Deduplicator (`sparsededup` - On `main` branch)
+```bash
+git checkout main && pip install -e .
+
+# Run a safe dry-run scan across a media folder to find duplicate files
+sparsededup /path/to/media/folder --dry-run
+```
 
 ---
 
-## 🔒 Security & Safe Computing
+## 🤖 Connecting Your Own Local AI / LLM (Ollama, vLLM, OpenAI)
 
-* **Zero Hardcoded Secrets:** This project contains zero hardcoded API keys, tokens, or credentials.
-* **Non-Destructive Defaults:** Default operation mode is always `--dry-run`. Deletions and mutations require explicit confirmation or `--confirm` flag.
-* **Inode Safety:** Hardlinks are validated against same-device filesystem constraints (`st_dev`) before replacement to prevent cross-volume link errors.
+Every project in this repository includes a **zero-configuration offline heuristic engine** that works 100% out-of-the-box with **no API keys required**.
+
+If you wish to connect your own local LLM (such as **Ollama** running `llama3.2` or `mistral`) or a cloud LLM:
+
+```python
+# Example: Custom 3-line Ollama adapter in Python
+import requests
+
+def my_ollama_adapter(query: str, context: dict) -> str:
+    prompt = f"System Context: {context}\n\nUser Question: {query}"
+    res = requests.post("http://localhost:11434/api/generate", json={"model": "llama3.2", "prompt": prompt, "stream": False})
+    return res.json()["response"]
+
+# Pass it to any engine:
+# from medcadence.advisor import HealthAdvisor
+# advisor = HealthAdvisor(custom_llm_callable=my_ollama_adapter)
+```
 
 ---
 
-## ⚖️ Trademarks & Licensing
+## ⚖️ Disclaimer & Standards
 
-All product names, logos, and brands referenced in documentation or benchmarks are property of their respective owners. Use of these names is for identification, compatibility, and descriptive purposes only and does not imply endorsement or affiliation.
+* **Proof of Concept Notice:** All software tools are provided for educational, informational, and exploratory modeling purposes.
+* **No Financial, Legal, or Medical Advice:** None of the tools constitute financial planning, legal counsel, or medical diagnosis. Always consult licensed professionals (CPAs, Attorneys, Physicians).
+* **Trademark Hygiene:** All referenced company, broker, lab, and product names (Robinhood, Schwab, Apple Health, Quest, etc.) are property of their respective trademark holders. Use is strictly for identification and compatibility.
 
-This project is licensed under the [MIT License](LICENSE).
+---
+
+## 📜 License
+
+All projects in this repository are open source and released under the [MIT License](LICENSE).
