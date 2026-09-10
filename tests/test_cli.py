@@ -96,9 +96,9 @@ def test_cli_full_workflow(tmp_path: Path, capsys):
             "--text",
             "2026-10-09: Student Holiday / Planning Day\n2026-11-23 to 2026-11-27: Thanksgiving Break",
             "--source",
-            "Fairfax County PS",
+            "Metro School District",
             "--students",
-            "Emma, Liam",
+            "Student A, Student B",
         ]
     )
     assert code == 0
@@ -108,7 +108,7 @@ def test_cli_full_workflow(tmp_path: Path, capsys):
     assert code == 0
     captured = capsys.readouterr()
     assert "Academic Events" in captured.out
-    assert "Fairfax County" in captured.out
+    assert "Metro School" in captured.out
 
     # School Conflicts
     code = main(["--data-dir", str(data_dir), "school", "conflicts"])

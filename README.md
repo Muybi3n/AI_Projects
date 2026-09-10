@@ -16,7 +16,7 @@
 
 Balancing demanding career commitments, engineering on-call rotations, family school schedules, and meaningful personal rest is a friction-filled challenge:
 
-* **Holiday & School Stacking Inefficiency:** Taking random isolated days off instead of synchronizing work PTO with **Federal holidays** and **K-12 school district calendars (e.g. Fairfax County Public Schools) or university syllabi** to maximize consecutive family time off.
+* **Holiday & School Stacking Inefficiency:** Taking random isolated days off instead of synchronizing work PTO with **Federal holidays** and **K-12 school district calendars or university syllabi** to maximize consecutive family time off.
 * **Childcare Conflict Blindspots:** Forgetting upcoming school-specific student holidays, teacher planning days, or early releases where kids have no school, but parents have normal working days.
 * **Multi-Child Syllabus Fragmentation:** Managing different syllabi across multiple children or university courses with separate break schedules and exam periods.
 * **Handover & Coverage Anxiety:** Stepping away without structured project handovers, causing emergency on-call pings and stalled PRs.
@@ -54,7 +54,7 @@ ptomax balance
 ptomax optimize --days 15 --year 2026
 
 # 3. Import school calendar / syllabi and check for childcare conflicts
-ptomax school import --file fcps_calendar.txt --source "Fairfax County PS" --students "Emma, Liam"
+ptomax school import --file district_calendar.txt --source "Metro School District" --students "Student A, Student B"
 ptomax school conflicts
 ptomax school family-breaks
 
@@ -77,8 +77,8 @@ ptomax school import --text "2026-10-09: Student Holiday / Teacher Planning Day
 2026-11-02 to 2026-11-03: Teacher Workday
 2026-11-25 to 2026-11-27: Thanksgiving Break
 2027-03-29 to 2027-04-02: Spring Break" \
-                     --source "Fairfax County PS" \
-                     --students "Emma, Liam"
+                     --source "Metro School District" \
+                     --students "Student A, Student B"
 ```
 
 ### 2. Childcare Conflict Radar
@@ -95,10 +95,10 @@ ptomax school conflicts
 ║               🌴 PTOMAX LEAVE & HOLIDAY OPTIMIZER                ║
 ╚══════════════════════════════════════════════════════════════════╝
 ╭──────────────────── 🚨 Childcare Conflict Radar (Workdays with No School) ────────────────────╮
-│ Date        Day       School Event                       Source School      Action Needed     │
-│ 2026-10-09  Friday    Student Holiday / Planning Day     Fairfax County PS  Plan PTO / Sitter │
-│ 2026-11-02  Monday    Teacher Workday                    Fairfax County PS  Plan PTO / Sitter │
-│ 2026-11-03  Tuesday   Teacher Workday                    Fairfax County PS  Plan PTO / Sitter │
+│ Date        Day       School Event                       Source School          Action Needed │
+│ 2026-10-09  Friday    Student Holiday / Planning Day     Metro School District  Plan PTO      │
+│ 2026-11-02  Monday    Teacher Workday                    Metro School District  Plan PTO      │
+│ 2026-11-03  Tuesday   Teacher Workday                    Metro School District  Plan PTO      │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────╯
 💡 Tip: Use 'ptomax ooo' or submit a PTO request for these dates before calendar slots fill up.
 ```

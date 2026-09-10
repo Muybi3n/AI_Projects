@@ -91,7 +91,7 @@ def main(args_list: list[str] | None = None) -> int:
         "-s",
         "--source",
         default="School Calendar",
-        help="Source name (e.g. 'Fairfax County PS', 'Stanford CS101')",
+        help="Source name (e.g. 'Metro School District', 'University CS101')",
     )
     school_import.add_argument(
         "--students", default="", help="Comma-separated student/child names (e.g. 'Emma, Liam')"
