@@ -23,6 +23,7 @@ This repository hosts a curated collection of production-grade, local-first Pyth
 | Project | Domain | Key Capabilities | Branch Link |
 | :--- | :--- | :--- | :--- |
 | **`sparsededup`** | Storage & Systems | 3-Point Sparse-Block BLAKE2b/SHA-256 deduplication for multi-terabyte arrays. | [`main`](https://github.com/Muybi3n/AI_Projects/tree/main) |
+| **`ptomax-core`** | Work-Life & Productivity | PTO holiday stacking optimizer (2.25x–4.0x leverage), project coverage delegation matrix & OOO synthesizer. | [`ptomax-core`](https://github.com/Muybi3n/AI_Projects/tree/ptomax-core) |
 | **`cardroute-engine`** | Credit Cards & Points | Dynamic spend routing optimizer, Chase 5/24 rule auditor, SUB minimum spend tracker & wallet audit. | [`cardroute-engine`](https://github.com/Muybi3n/AI_Projects/tree/cardroute-engine) |
 | **`flowbalance-core`** | Personal Finance | Deterministic cash flow forecasting, solvency runway stress-testing, FTS5 search & AI advisor. | [`flowbalance-core`](https://github.com/Muybi3n/AI_Projects/tree/flowbalance-core) |
 | **`capdrift-engine`** | Investment Portfolios | Broker CSV ingestion (Robinhood, Schwab, etc.), HHI concentration, drift rebalancing & dividend snowball. | [`capdrift-engine`](https://github.com/Muybi3n/AI_Projects/tree/capdrift-engine) |
