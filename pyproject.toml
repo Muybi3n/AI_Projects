@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "capdrift-engine"
+version = "0.1.0"
+description = "Local-first portfolio analytics, capital drift auditor, dividend snowball simulator, and AI investment companion."
+readme = "README.md"
+authors = [
+    { name = "bi3n", email = "Muybi3n@users.noreply.github.com" }
+]
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "portfolio-tracker",
+    "asset-allocation",
+    "rebalancing",
+    "dividend-snowball",
+    "stress-testing",
+    "local-first",
+    "llm-companion",
+    "personal-finance"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment"
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0"
+]
+
+[project.scripts]
+capdrift = "capdrift.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Muybi3n/AI_Projects"
+Repository = "https://github.com/Muybi3n/AI_Projects"
+"Bug Tracker" = "https://github.com/Muybi3n/AI_Projects/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=capdrift --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
