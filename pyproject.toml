@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sparsededup"
+version = "0.1.0"
+description = "High-throughput sparse-block deduplication and integrity scanner for massive storage arrays and media libraries."
+readme = "README.md"
+authors = [
+    { name = "bi3n", email = "Muybi3n@users.noreply.github.com" }
+]
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "deduplication",
+    "storage",
+    "sparse-hash",
+    "nas",
+    "homelab",
+    "file-integrity",
+    "media-management"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Archiving :: Backup",
+    "Topic :: System :: Filesystems",
+    "Topic :: Utilities"
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0"
+]
+
+[project.scripts]
+sparsededup = "sparsededup.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Muybi3n/sparsededup"
+Repository = "https://github.com/Muybi3n/sparsededup"
+"Bug Tracker" = "https://github.com/Muybi3n/sparsededup/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=sparsededup --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
