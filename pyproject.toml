@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flowbalance-core"
+version = "0.1.0"
+description = "Deterministic local-first cash flow forecasting, multi-bucket allocation, and solvency runway engine."
+readme = "README.md"
+authors = [
+    { name = "bi3n", email = "Muybi3n@users.noreply.github.com" }
+]
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "personal-finance",
+    "cash-flow-forecasting",
+    "budgeting",
+    "wealth-management",
+    "runway-calculator",
+    "local-first",
+    "financial-health"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Accounting"
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0"
+]
+
+[project.scripts]
+flowbalance = "flowbalance.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Muybi3n/AI_Projects"
+Repository = "https://github.com/Muybi3n/AI_Projects"
+"Bug Tracker" = "https://github.com/Muybi3n/AI_Projects/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=flowbalance --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
