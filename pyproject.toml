@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lexicast-engine"
+version = "0.1.0"
+description = "Local-first audio transcription and 5-layer structured insight distillation pipeline with SQLite FTS5 search."
+readme = "README.md"
+authors = [
+    { name = "bi3n", email = "Muybi3n@users.noreply.github.com" }
+]
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "nlp",
+    "audio-transcription",
+    "podcast-distillation",
+    "knowledge-base",
+    "sqlite-fts5",
+    "structured-extraction",
+    "local-ai"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: General"
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0"
+]
+
+[project.scripts]
+lexicast = "lexicast_engine.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Muybi3n/lexicast-engine"
+Repository = "https://github.com/Muybi3n/lexicast-engine"
+"Bug Tracker" = "https://github.com/Muybi3n/lexicast-engine/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=lexicast_engine --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
