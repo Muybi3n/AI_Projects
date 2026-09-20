@@ -138,6 +138,22 @@ cardroute audit
 
 ---
 
+## ⚖️ Disclaimer of Liability & Limited Liability Notice
+
+### 1. Not Financial, Credit, or Legal Advice
+This software and associated documentation are provided strictly for **informational, educational, and Proof of Concept (POC) exploratory modeling purposes**. Nothing contained in this codebase constitutes credit advice, financial planning, banking recommendations, tax advice, or lending counsel.
+
+### 2. No Fiduciary or Banking Relationship
+Use of this software does not create an advisor-client, fiduciary, or banking relationship between you and the authors or contributors.
+
+### 3. Nominative Fair Use
+All card issuer names, reward program trademarks, and merchant names (e.g., Chase, American Express, Capital One, Visa, Mastercard) are trademarks™ or registered® trademarks of their respective holders. Use of them is strictly for identification and compatibility and does not imply endorsement or affiliation.
+
+### 4. Limitation of Liability & "AS IS" Provision
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY FINANCIAL LOSSES, CREDIT SCORE IMPACT, MISSED REWARDS, UNEXPECTED ANNUAL FEES, OR CALCULATION INACCURACIES ARISING FROM ITS USE.
+
+---
+
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
