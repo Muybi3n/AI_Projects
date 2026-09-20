@@ -149,6 +149,14 @@ ptomax ooo --start 2026-05-23 --end 2026-05-31 --style external
 
 ---
 
+## ⚖️ Disclaimer
+
+* **Non-HR & Educational Use Only:** `ptomax-core` is an independent open-source scheduling optimization tool and educational proof-of-concept. It does not constitute official human resources, employment, legal, or payroll advice.
+* **Employer Policy Compliance:** PTO rules, rollover caps, and leave approvals remain subject to your employer's specific policies and formal managerial approval.
+* **Nominative Fair Use:** All product and company names mentioned are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.
+
+---
+
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
