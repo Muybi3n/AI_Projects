@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ cardroute-engine, main, '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ cardroute-engine, main, '**' ]
 
 jobs:
   test:
