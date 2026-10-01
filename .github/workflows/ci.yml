@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ careguard-core, main, '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ careguard-core, main, '**' ]
 
 jobs:
   test:
