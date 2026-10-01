@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ flowbalance-core, main, '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ flowbalance-core, main, '**' ]
 
 jobs:
   test:
