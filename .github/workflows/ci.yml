@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ oncorenal-core, main, '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ oncorenal-core, main, '**' ]
 
 jobs:
   test:
