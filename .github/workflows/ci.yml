@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ trustguard-core, main, '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ trustguard-core, main, '**' ]
 
 jobs:
   test:
