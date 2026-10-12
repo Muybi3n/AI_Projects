@@ -23,6 +23,7 @@ This repository hosts a curated collection of production-grade, local-first Pyth
 | Project | Domain | Key Capabilities | Branch Link |
 | :--- | :--- | :--- | :--- |
 | **`socmesh-audit`** | Mini-SOC & Cyber Defense | Homelab & SIEM telemetry normalizer (Wazuh, Pi-hole, Linux Auth), MITRE ATT&CK correlation, blast-radius risk scoring & alert triage governor. | [`socmesh-audit`](https://github.com/Muybi3n/AI_Projects/tree/socmesh-audit) |
+| **`shelfwise-core`** | Hardware & Asset Management | Local-first hardware asset inventory, warranty expiration radar, cryptographic receipt registry & insurance claims packager. | [`shelfwise-core`](https://github.com/Muybi3n/AI_Projects/tree/shelfwise-core) |
 | **`subwatch-engine`** | Subscriptions & Cost Optimization | Local-first subscription price-creep auditor, renewal alert radar, zombie subscription pruner & SaaS negotiation briefs. | [`subwatch-engine`](https://github.com/Muybi3n/AI_Projects/tree/subwatch-engine) |
 | **`sparsededup`** | Storage & Systems | 3-Point Sparse-Block BLAKE2b/SHA-256 deduplication for multi-terabyte arrays. | [`main`](https://github.com/Muybi3n/AI_Projects/tree/main) |
 | **`inboxguard-core`** | Email & Productivity | Local-first 5-tier email classifier, newsletter subscription purge, phishing audit & Gmail/Sieve filter generator. | [`inboxguard-core`](https://github.com/Muybi3n/AI_Projects/tree/inboxguard-core) |
