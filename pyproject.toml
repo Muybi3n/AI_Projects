@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shelfwise-core"
+version = "0.1.0"
+description = "Local-first hardware asset inventory, warranty radar & insurance claims packager."
+readme = "README.md"
+authors = [{ name = "Muybi3n", email = "Muybi3n@users.noreply.github.com" }]
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "hardware-inventory",
+    "warranty-tracker",
+    "receipt-scanner",
+    "homelab",
+    "asset-management",
+    "depreciation",
+    "insurance-claims",
+    "local-first",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Hardware",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "build>=1.0.0",
+]
+
+[project.scripts]
+shelfwise = "shelfwise.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "BLE", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "--cov=shelfwise --cov-report=term-missing"
