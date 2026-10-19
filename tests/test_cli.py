@@ -320,3 +320,34 @@ def test_cli_errors_and_edge_cases(tmp_path: Path, capsys):
     # No arguments
     exit_code = main([])
     assert exit_code == 1
+
+
+def test_cli_demo_command(tmp_path: Path, capsys):
+    data_dir = str(tmp_path / "subwatch_demo_test")
+
+    # Run demo
+    exit_code = main(["--data-dir", data_dir, "demo"])
+    assert exit_code == 0
+    out, _ = capsys.readouterr()
+    assert "SUBWATCH DEMO ENVIRONMENT READY" in out
+    assert "Seeded 4 realistic subscriptions" in out
+
+    # Re-run without --force
+    exit_code_warn = main(["--data-dir", data_dir, "demo"])
+    assert exit_code_warn == 1
+    out_warn, _ = capsys.readouterr()
+    assert "already contains 4 subscriptions" in out_warn
+
+    # Re-run with --force
+    exit_code_force = main(["--data-dir", data_dir, "demo", "--force"])
+    assert exit_code_force == 0
+    out_force, _ = capsys.readouterr()
+    assert "SUBWATCH DEMO ENVIRONMENT READY" in out_force
+
+    # Verify audit output on seeded demo data
+    exit_code_audit = main(["--data-dir", data_dir, "audit"])
+    assert exit_code_audit == 0
+    out_audit, _ = capsys.readouterr()
+    assert "STEALTH HIKE" in out_audit
+    assert "Gym & Fitness Club" in out_audit
+    assert "Netflix Standard" in out_audit

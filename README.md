@@ -23,7 +23,7 @@ Unlike cloud aggregators that require storing sensitive bank login credentials o
 
 ## ⚡ 30-Second Beginner Quickstart
 
-Run these three commands in your terminal to immediately audit your recurring subscriptions:
+Run these three commands in your terminal to immediately explore a populated subwatch environment:
 
 ```bash
 # 1. Clone and navigate to the project
@@ -33,7 +33,13 @@ git checkout subwatch-engine
 # 2. Install subwatch locally
 pip install -e .
 
-# 3. Add a subscription and run your first price-creep audit
+# 3. Load beginner demo data and run an instant audit in 2 commands:
+subwatch demo
+subwatch audit
+```
+
+Want to test manual tracking from scratch instead?
+```bash
 subwatch add --name "Netflix Standard" --price 15.49 --category entertainment --cycle monthly --start-date 2024-01-01 --initial-charge 15.49 --renewal-date 2026-10-25 --usage 4
 subwatch log-charge "Netflix Standard" --amount 17.99 --date 2026-10-01
 subwatch audit

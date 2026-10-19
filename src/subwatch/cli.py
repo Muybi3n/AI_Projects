@@ -18,7 +18,13 @@ from subwatch.engine import (
     get_upcoming_renewals,
     parse_transaction_csv,
 )
-from subwatch.models import BillingCycle, Category, Subscription, SubscriptionStatus
+from subwatch.models import (
+    BillingCycle,
+    Category,
+    ChargeRecord,
+    Subscription,
+    SubscriptionStatus,
+)
 from subwatch.storage import StorageManager
 
 
@@ -394,6 +400,152 @@ def cmd_ask(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_demo(args: argparse.Namespace) -> int:
+    """Pre-load a beginner-friendly sample dataset with realistic price creep and zombies."""
+    storage = get_storage(args.data_dir)
+    existing = storage.load_all()
+    if existing and not args.force:
+        print(f"⚠️  Vault already contains {len(existing)} subscriptions.")
+        print("💡 Run `subwatch demo --force` to overwrite existing records.")
+        return 1
+
+    sample_subscriptions = [
+        Subscription(
+            id="sub-netflix",
+            name="Netflix Standard",
+            current_price=17.99,
+            category=Category.ENTERTAINMENT,
+            billing_cycle=BillingCycle.MONTHLY,
+            status=SubscriptionStatus.ACTIVE,
+            vendor="Netflix Inc.",
+            start_date="2023-01-15",
+            next_renewal_date=date.today().isoformat(),
+            cancellation_notice_days=3,
+            payment_method="Amex Gold ...1004",
+            autopay=True,
+            usage_rating=4,
+            charge_history=[
+                ChargeRecord(
+                    id="rec-net-1",
+                    subscription_id="sub-netflix",
+                    amount=15.49,
+                    date="2023-01-15",
+                    notes="Initial plan pricing",
+                ),
+                ChargeRecord(
+                    id="rec-net-2",
+                    subscription_id="sub-netflix",
+                    amount=17.99,
+                    date="2024-02-01",
+                    notes="Price hike notification",
+                ),
+            ],
+            notes="Family movie night subscription",
+        ),
+        Subscription(
+            id="sub-gym",
+            name="Gym & Fitness Club",
+            current_price=65.00,
+            category=Category.HEALTH_FITNESS,
+            billing_cycle=BillingCycle.MONTHLY,
+            status=SubscriptionStatus.ACTIVE,
+            vendor="Metropolitan Fitness",
+            start_date="2023-06-01",
+            next_renewal_date=date.today().isoformat(),
+            cancellation_notice_days=30,
+            payment_method="Visa Infinite ...4829",
+            autopay=True,
+            usage_rating=1,  # Zombie candidate!
+            charge_history=[
+                ChargeRecord(
+                    id="rec-gym-1",
+                    subscription_id="sub-gym",
+                    amount=55.00,
+                    date="2023-06-01",
+                    notes="Sign-up promo",
+                ),
+                ChargeRecord(
+                    id="rec-gym-2",
+                    subscription_id="sub-gym",
+                    amount=65.00,
+                    date="2024-01-01",
+                    notes="Annual rate adjustment",
+                ),
+            ],
+            notes="Dormant membership - visited twice in 6 months",
+        ),
+        Subscription(
+            id="sub-copilot",
+            name="GitHub Copilot & Pro",
+            current_price=10.00,
+            category=Category.DEVELOPER_CLOUD,
+            billing_cycle=BillingCycle.MONTHLY,
+            status=SubscriptionStatus.ACTIVE,
+            vendor="GitHub Inc.",
+            start_date="2023-09-10",
+            next_renewal_date=date.today().isoformat(),
+            cancellation_notice_days=1,
+            payment_method="Mastercard ...9120",
+            autopay=True,
+            usage_rating=5,
+            charge_history=[
+                ChargeRecord(
+                    id="rec-cop-1",
+                    subscription_id="sub-copilot",
+                    amount=10.00,
+                    date="2023-09-10",
+                    notes="Monthly plan",
+                ),
+            ],
+            notes="Daily coding companion",
+        ),
+        Subscription(
+            id="sub-storage",
+            name="Cloud Storage 2TB",
+            current_price=99.99,
+            category=Category.PRODUCTIVITY,
+            billing_cycle=BillingCycle.ANNUAL,
+            status=SubscriptionStatus.ACTIVE,
+            vendor="Google Cloud / Drive",
+            start_date="2022-11-20",
+            next_renewal_date=date.today().isoformat(),
+            cancellation_notice_days=7,
+            payment_method="Amex Gold ...1004",
+            autopay=True,
+            usage_rating=5,
+            charge_history=[
+                ChargeRecord(
+                    id="rec-sto-1",
+                    subscription_id="sub-storage",
+                    amount=99.99,
+                    date="2022-11-20",
+                    notes="Annual tier",
+                ),
+            ],
+            notes="Family photo backup & documents",
+        ),
+    ]
+
+    storage.save_all(sample_subscriptions)
+
+    print("================================================================================")
+    print("  🚀 SUBWATCH DEMO ENVIRONMENT READY")
+    print("================================================================================")
+    print(f"  ✅ Seeded {len(sample_subscriptions)} realistic subscriptions into local vault:")
+    print("     • Netflix Standard ($17.99/mo) — exhibits stealth price creep from $15.49")
+    print("     • Gym & Fitness Club ($65.00/mo) — flagged as low-usage 'Zombie' subscription")
+    print("     • GitHub Copilot & Pro ($10.00/mo) — high-utility active developer tool")
+    print("     • Cloud Storage 2TB ($99.99/yr) — annual renewal alert radar")
+    print("")
+    print("  💡 Next Beginner Commands to Try:")
+    print("     1. subwatch audit        -> Run financial health & price creep audit")
+    print("     2. subwatch renewals     -> View upcoming renewal radar countdowns")
+    print("     3. subwatch brief 'Gym'  -> Auto-draft a cancellation playbook")
+    print("     4. subwatch ask 'Where am I wasting money?' -> Query AI advisor")
+    print("================================================================================")
+    return 0
+
+
 def cmd_export(args: argparse.Namespace) -> int:
     storage = get_storage(args.data_dir)
     subs = storage.load_all()
@@ -569,6 +721,15 @@ def main(argv: list[str] | None = None) -> int:
     p_exp.add_argument("--format", choices=["json", "md"], default="json", help="Export format")
     p_exp.add_argument("--out", help="Output file path")
     p_exp.set_defaults(func=cmd_export)
+
+    # demo / quickstart
+    p_demo = subparsers.add_parser(
+        "demo", help="Pre-load a beginner-friendly sample dataset with price creep and zombie subs"
+    )
+    p_demo.add_argument(
+        "--force", action="store_true", help="Force overwrite existing subscriptions in vault"
+    )
+    p_demo.set_defaults(func=cmd_demo)
 
     args = parser.parse_args(argv)
     if not hasattr(args, "func"):

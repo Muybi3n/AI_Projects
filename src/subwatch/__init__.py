@@ -13,7 +13,7 @@ from subwatch.models import (
     ZombieSubscription,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = [
     "AuditSummary",
     "BillingCycle",

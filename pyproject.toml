@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "subwatch-engine"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local-first subscription price-creep auditor, renewal alert radar & recurring SaaS optimizer."
 readme = "README.md"
 authors = [{ name = "Muybi3n", email = "Muybi3n@users.noreply.github.com" }]
