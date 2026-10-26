@@ -22,6 +22,7 @@ This repository hosts a curated collection of production-grade, local-first Pyth
 
 | Project | Domain | Key Capabilities | Branch Link |
 | :--- | :--- | :--- | :--- |
+| **`promptguard-proxy`** | GenAI Security & Privacy | Local reverse-proxy for sanitizing PII and neutralizing prompt injections (MITRE ATLAS mapped) before reaching upstream LLMs. | [`promptguard-proxy`](https://github.com/Muybi3n/AI_Projects/tree/promptguard-proxy) |
 | **`canarymesh-core`** | Cyber Deception & Tripwires | Local-first defensive decoy file generator, cryptographic baseline tripwires (SHA-256/BLAKE2b), tampering sentinel & MITRE ATT&CK mapping. | [`canarymesh-core`](https://github.com/Muybi3n/AI_Projects/tree/canarymesh-core) |
 | **`socmesh-audit`** | Mini-SOC & Cyber Defense | Homelab & SIEM telemetry normalizer (Wazuh, Pi-hole, Linux Auth), MITRE ATT&CK correlation, blast-radius risk scoring & alert triage governor. | [`socmesh-audit`](https://github.com/Muybi3n/AI_Projects/tree/socmesh-audit) |
 | **`shelfwise-core`** | Hardware & Asset Management | Local-first hardware asset inventory, warranty expiration radar, cryptographic receipt registry & insurance claims packager. | [`shelfwise-core`](https://github.com/Muybi3n/AI_Projects/tree/shelfwise-core) |
